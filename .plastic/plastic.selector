@@ -1,0 +1,3 @@
+repository "My project 2025-12-27_14-29-20/VoidLoop@18966916181044@cloud"
+  path "/"
+    smartbranch "/main/test/fatihtest"
