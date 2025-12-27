@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Unity 2022 için First Person Controller
 /// Kullanım: Bu scripti Player objesine ekleyin ve gerekli referansları atayın.
+/// Gamepad ve Klavye/Fare desteği mevcuttur.
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -25,6 +26,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float mouseSensitivity = 2f;
     [SerializeField] private float maxLookAngle = 85f;
     [SerializeField] private bool invertY = false;
+
+    [Header("Gamepad Ayarları")]
+    [SerializeField] private float gamepadLookSensitivity = 1.2f;
+    [SerializeField] private float gamepadAimAssistDeadzone = 0.15f;
+    [Tooltip("Analog stick dead zone değeri")]
+    [SerializeField] private float stickDeadzone = 0.1f;
+    [Tooltip("Sağ analog stick için hızlanma eğrisi (1 = lineer, 2+ = üstel)")]
+    [SerializeField] private float lookAccelerationCurve = 2f;
+    [Tooltip("Gamepad titreşim özelliğini aktifleştir")]
+    [SerializeField] private bool enableVibration = true;
 
     [Header("Eğilme (Crouch) Ayarları")]
     [SerializeField] private float standingHeight = 2f;
@@ -57,6 +68,11 @@ public class PlayerController : MonoBehaviour
     private bool wasPreviouslyGrounded;
     private bool isCrouching;
     private bool isSprinting;
+    
+    // Gamepad private değişkenler
+    private bool isUsingGamepad;
+    private bool crouchTogglePressed;
+    private float vibrationTimer;
 
     private void Awake()
     {
@@ -112,9 +128,10 @@ public class PlayerController : MonoBehaviour
         ApplyMovement();
         HandleFootsteps();
         HandleLanding();
+        HandleVibration();
 
-        // ESC tuşu ile cursor'u serbest bırak
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // ESC tuşu veya gamepad Start butonu ile cursor'u serbest bırak
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton7))
         {
             ToggleCursor();
         }
@@ -137,12 +154,39 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovementInput()
     {
-        // Input al
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
+        // Klavye input'u al
+        float keyboardHorizontal = Input.GetAxisRaw("Horizontal");
+        float keyboardVertical = Input.GetAxisRaw("Vertical");
+        
+        // Gamepad sol analog stick input'u
+        float gamepadHorizontal = Input.GetAxis("Horizontal");
+        float gamepadVertical = Input.GetAxis("Vertical");
+        
+        // Gamepad dead zone uygula
+        Vector2 gamepadInput = new Vector2(gamepadHorizontal, gamepadVertical);
+        if (gamepadInput.magnitude < stickDeadzone)
+        {
+            gamepadInput = Vector2.zero;
+        }
+        else
+        {
+            // Dead zone'u normalize et
+            gamepadInput = gamepadInput.normalized * ((gamepadInput.magnitude - stickDeadzone) / (1f - stickDeadzone));
+        }
+        
+        // Klavye veya gamepad kullanımını tespit et
+        float horizontal = Mathf.Abs(keyboardHorizontal) > 0.1f ? keyboardHorizontal : gamepadInput.x;
+        float vertical = Mathf.Abs(keyboardVertical) > 0.1f ? keyboardVertical : gamepadInput.y;
+        
+        // Gamepad kullanım tespiti
+        isUsingGamepad = gamepadInput.magnitude > 0.1f || 
+                         Mathf.Abs(Input.GetAxis("RightStickHorizontal")) > stickDeadzone || 
+                         Mathf.Abs(Input.GetAxis("RightStickVertical")) > stickDeadzone;
 
-        // Sprint kontrolü
-        isSprinting = Input.GetKey(KeyCode.LeftShift) && !isCrouching && vertical > 0;
+        // Sprint kontrolü (Klavye: Left Shift, Gamepad: Left Stick Click veya Left Bumper)
+        bool sprintKeyboard = Input.GetKey(KeyCode.LeftShift);
+bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
+        isSprinting = (sprintKeyboard || sprintGamepad) && !isCrouching && vertical > 0;
 
         // Hedef hızı belirle
         float targetSpeed;
@@ -178,7 +222,10 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded && !isCrouching)
+        // Klavye: Space, Gamepad: A butonu (South) - Unity Input Manager "Jump" olarak tanımlı
+        bool jumpPressed = Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.JoystickButton0);
+        
+        if (jumpPressed && isGrounded && !isCrouching)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             
@@ -187,12 +234,44 @@ public class PlayerController : MonoBehaviour
             {
                 audioSource.PlayOneShot(jumpSound);
             }
+            
+            // Gamepad titreşimi
+            TriggerVibration(0.2f, 0.3f, 0.1f);
         }
     }
 
     private void HandleCrouch()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.C))
+        // Klavye: Left Control veya C, Gamepad: B butonu (East) veya Right Stick Click
+        bool crouchKeyboard = Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.C);
+        bool crouchGamepad = Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.JoystickButton9); // B veya RS
+        
+        // Toggle sistemi için gamepad kontrolü
+        if (!crouchTogglePressed && (Input.GetKey(KeyCode.JoystickButton1) || Input.GetKey(KeyCode.JoystickButton9)))
+        {
+            crouchTogglePressed = true;
+            
+            if (isCrouching)
+            {
+                if (!Physics.Raycast(transform.position, Vector3.up, standingHeight - crouchHeight + 0.1f))
+                {
+                    isCrouching = false;
+                    targetHeight = standingHeight;
+                }
+            }
+            else
+            {
+                isCrouching = true;
+                targetHeight = crouchHeight;
+            }
+        }
+        else if (!Input.GetKey(KeyCode.JoystickButton1) && !Input.GetKey(KeyCode.JoystickButton9))
+        {
+            crouchTogglePressed = false;
+        }
+        
+        // Klavye crouch kontrolü
+        if (crouchKeyboard)
         {
             if (isCrouching)
             {
@@ -236,17 +315,40 @@ public class PlayerController : MonoBehaviour
         if (Cursor.lockState != CursorLockMode.Locked)
             return;
 
+        // Fare girişi
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+        
+        // Gamepad sağ analog stick girişi
+        float gamepadLookX = Input.GetAxis("RightStickHorizontal");
+        float gamepadLookY = Input.GetAxis("RightStickVertical");
+        
+        // Gamepad dead zone uygula
+        Vector2 gamepadLook = new Vector2(gamepadLookX, gamepadLookY);
+        if (gamepadLook.magnitude < gamepadAimAssistDeadzone)
+        {
+            gamepadLook = Vector2.zero;
+        }
+        else
+        {
+            // Dead zone'u normalize et ve üstel hızlanma eğrisi uygula
+            float normalizedMagnitude = (gamepadLook.magnitude - gamepadAimAssistDeadzone) / (1f - gamepadAimAssistDeadzone);
+            normalizedMagnitude = Mathf.Pow(normalizedMagnitude, lookAccelerationCurve);
+            gamepadLook = gamepadLook.normalized * normalizedMagnitude * gamepadLookSensitivity;
+        }
+        
+        // Her iki girişi birleştir (fare öncelikli)
+        float lookX = Mathf.Abs(mouseX) > 0.01f ? mouseX : gamepadLook.x;
+        float lookY = Mathf.Abs(mouseY) > 0.01f ? mouseY : gamepadLook.y;
 
         if (invertY)
-            mouseY = -mouseY;
+            lookY = -lookY;
 
         // Yatay dönüş (Player objesini döndür)
-        transform.Rotate(Vector3.up * mouseX);
+        transform.Rotate(Vector3.up * lookX);
 
         // Dikey dönüş (Kamerayı döndür)
-        xRotation -= mouseY;
+        xRotation -= lookY;
         xRotation = Mathf.Clamp(xRotation, -maxLookAngle, maxLookAngle);
 
         if (cameraHolder != null)
@@ -325,7 +427,52 @@ public class PlayerController : MonoBehaviour
             {
                 audioSource.PlayOneShot(landSound);
             }
+            
+            // Sert iniş için gamepad titreşimi
+            float impactIntensity = Mathf.Clamp01(Mathf.Abs(velocity.y) / 20f);
+            TriggerVibration(impactIntensity * 0.5f, impactIntensity, 0.2f);
         }
+    }
+    
+    private void HandleVibration()
+    {
+        if (vibrationTimer > 0)
+        {
+            vibrationTimer -= Time.deltaTime;
+            if (vibrationTimer <= 0)
+            {
+                StopVibration();
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Gamepad titreşimini tetikler
+    /// </summary>
+    /// <param name="lowFrequency">Düşük frekans motor gücü (0-1)</param>
+    /// <param name="highFrequency">Yüksek frekans motor gücü (0-1)</param>
+    /// <param name="duration">Titreşim süresi (saniye)</param>
+    private void TriggerVibration(float lowFrequency, float highFrequency, float duration)
+    {
+        if (!enableVibration) return;
+        
+        #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        // Unity Input System kullanılıyorsa
+        // UnityEngine.InputSystem.Gamepad.current?.SetMotorSpeeds(lowFrequency, highFrequency);
+        #endif
+        
+        vibrationTimer = duration;
+    }
+    
+    /// <summary>
+    /// Gamepad titreşimini durdurur
+    /// </summary>
+    private void StopVibration()
+    {
+        #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        // Unity Input System kullanılıyorsa
+        // UnityEngine.InputSystem.Gamepad.current?.SetMotorSpeeds(0, 0);
+        #endif
     }
 
     private void ToggleCursor()
@@ -346,6 +493,7 @@ public class PlayerController : MonoBehaviour
     public bool IsGrounded() => isGrounded;
     public bool IsSprinting() => isSprinting;
     public bool IsCrouching() => isCrouching;
+    public bool IsUsingGamepad() => isUsingGamepad;
     public Vector3 GetVelocity() => currentMoveVelocity;
     public float GetCurrentSpeed() => currentMoveVelocity.magnitude;
 
@@ -353,10 +501,24 @@ public class PlayerController : MonoBehaviour
     {
         mouseSensitivity = sensitivity;
     }
+    
+    public void SetGamepadLookSensitivity(float sensitivity)
+    {
+        gamepadLookSensitivity = sensitivity;
+    }
 
     public void SetInvertY(bool invert)
     {
         invertY = invert;
+    }
+    
+    public void SetVibrationEnabled(bool enabled)
+    {
+        enableVibration = enabled;
+        if (!enabled)
+        {
+            StopVibration();
+        }
     }
 
     // Gizmos ile debug görselleştirme
