@@ -18,6 +18,9 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Anomali sahneleri listesi")]
     [SerializeField] private string[] anomalySceneNames;
     
+    [Tooltip("Final/Kazanma sahnesi")]
+    [SerializeField] private string finalSceneName = "FinalMap";
+    
     [Header("Oyun Ayarları")]
     [Tooltip("Anomali çıkma olasılığı (0-1)")]
     [Range(0f, 1f)]
@@ -257,11 +260,29 @@ public class LevelManager : MonoBehaviour
     {
         if (showDebugInfo)
         {
-            Debug.Log($"[LevelManager] KAZANILDI! Doğru: {correctChoices}, Yanlış: {wrongChoices}");
+            Debug.Log($"[LevelManager] KAZANILDI! Doğru: {correctChoices}, Yanlış: {wrongChoices} - Final sahnesine geçiliyor...");
         }
         
-        // Win işlemleri (sahne yükle veya UI göster)
-        // SceneManager.LoadScene("WinScene");
+        // Direkt Final sahnesine geç
+        StartCoroutine(LoadSceneWithDelay(finalSceneName));
+    }
+    
+    /// <summary>
+    /// Final sahnesinden çağrılır - Skoru koruyarak Level 0'a döner
+    /// </summary>
+    public void ContinueFromFinal()
+    {
+        if (showDebugInfo)
+        {
+            Debug.Log($"[LevelManager] Final'den devam ediliyor. Toplam Doğru: {correctChoices}, Yanlış: {wrongChoices}");
+        }
+        
+        // Round'u sıfırla ama SKORU KORU
+        currentRound = 0;
+        usedAnomalyIndices.Clear();
+        
+        // Level 0'a dön
+        StartCoroutine(LoadSceneWithDelay(normalSceneName));
     }
 
     private void ResetProgress()
