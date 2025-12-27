@@ -615,7 +615,7 @@ GameObject:
   - component: {fileID: 657692735}
   - component: {fileID: 657692734}
   m_Layer: 5
-  m_Name: Status
+  m_Name: AnomalyStatusText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -637,7 +637,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1209, y: 614}
+  m_AnchoredPosition: {x: 1049.4, y: 614}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &657692734
@@ -995,10 +995,12 @@ MonoBehaviour:
   - Level_1_Anomaly
   - Level_1_Anomaly_Cube
   - Level_1_Anomaly_Sphere
-  finalSceneName: FinalMap
-  anomalyChance: 0.5
+  finalSceneName: Final
+  anomalyChance: 0.69
   winCondition: 8
-  sceneTransitionDelay: 1
+  maxConsecutiveNormal: 2
+  maxConsecutiveAnomaly: 4
+  sceneTransitionDelay: 0.3
   levelText: {fileID: 73186412}
   anomalyStatusText: {fileID: 657692734}
   showDebugInfo: 1
@@ -1040,6 +1042,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  normalBlinkColor: {r: 0, g: 0, b: 0, a: 1}
+  errorBlinkColor: {r: 0.8, g: 0, b: 0, a: 1}
   fadeImage: {fileID: 0}
   fadeCanvas: {fileID: 0}
 --- !u!1 &1120349916
@@ -1111,7 +1115,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 4
+  m_Lightmapping: 2
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
