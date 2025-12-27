@@ -1729,6 +1729,16 @@ PrefabInstance:
       objectReference: {fileID: 1248071051}
     - target: {fileID: 972553540652576919, guid: 0c9aff6f3386d9a4fb6893e262273dfc,
         type: 3}
+      propertyPath: playerTransform
+      value: 
+      objectReference: {fileID: 1248071051}
+    - target: {fileID: 972553540652576919, guid: 0c9aff6f3386d9a4fb6893e262273dfc,
+        type: 3}
+      propertyPath: headbobCompensation
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 972553540652576919, guid: 0c9aff6f3386d9a4fb6893e262273dfc,
+        type: 3}
       propertyPath: rotationFollowAmount
       value: 0
       objectReference: {fileID: 0}
