@@ -10,16 +10,16 @@ public class WeepingEnemy : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float rotationSpeed = 8f;
     [SerializeField] private bool useNavMesh = true;
+    [Tooltip("Spawn yüksekliği offset")]
+    [SerializeField] private float spawnHeightOffset = 0f;
     
     [Header("Görüş Kontrolü")]
-    [Tooltip("Oyuncunun kamerasından bakış açısı kontrolü için")]
-    [SerializeField] private float viewAngle = 60f;
+    [Tooltip("Ekran kenarından margin (0.1 = %10)")]
+    [SerializeField] [Range(0f, 0.3f)] private float screenMargin = 0.1f;
     [Tooltip("Görünürlük için maksimum mesafe (0 = sınırsız)")]
     [SerializeField] private float maxViewDistance = 0f;
-    [Tooltip("Görünürlük kontrolü için raycast kullan")]
-    [SerializeField] private bool useLineOfSight = true;
-    [Tooltip("Raycast için engel katmanları")]
-    [SerializeField] private LayerMask obstacleLayer = ~0;
+    [Tooltip("Engel kontrolünü devre dışı bırak (test için)")]
+    [SerializeField] private bool disableObstacleCheck = true;
     
     [Header("Temas Ayarları")]
     [SerializeField] private float damageRadius = 2f;
@@ -38,7 +38,7 @@ public class WeepingEnemy : MonoBehaviour
     [SerializeField] private string frozenAnimParam = "IsFrozen";
     
     [Header("Debug")]
-    [SerializeField] private bool showDebugInfo = false;
+    [SerializeField] private bool showDebugInfo = true;
     
     // Private değişkenler
     private Transform player;
@@ -47,16 +47,19 @@ public class WeepingEnemy : MonoBehaviour
     private bool isVisible = false;
     private bool wasVisible = false;
     private bool hasCaughtPlayer = false;
-    private float nextCheckTime;
-    
-    // Görünürlük kontrolü için referans noktaları
-    private Vector3[] checkPoints;
 
     private void Start()
     {
+        // Yükseklik düzeltmesi
+        if (spawnHeightOffset != 0)
+        {
+            transform.position += Vector3.up * spawnHeightOffset;
+        }
+        
         FindPlayer();
         SetupNavMesh();
-        SetupCheckPoints();
+        
+        Debug.Log($"[WeepingEnemy] Başlatıldı! Kamera: {playerCamera?.name}");
     }
 
     private void FindPlayer()
@@ -66,18 +69,14 @@ public class WeepingEnemy : MonoBehaviour
         if (playerObj != null)
         {
             player = playerObj.transform;
-            
-            // Kamerayı bul - önce çocuk olarak ara
             playerCamera = playerObj.GetComponentInChildren<Camera>();
             
-            // Bulamazsa ana kamerayı kullan
             if (playerCamera == null)
             {
                 playerCamera = Camera.main;
             }
             
-            if (showDebugInfo)
-                Debug.Log($"[WeepingEnemy] Player bulundu: {playerObj.name}, Kamera: {playerCamera?.name}");
+            Debug.Log($"[WeepingEnemy] Player bulundu: {playerObj.name}");
             return;
         }
         
@@ -91,9 +90,6 @@ public class WeepingEnemy : MonoBehaviour
             {
                 playerCamera = Camera.main;
             }
-            
-            if (showDebugInfo)
-                Debug.Log($"[WeepingEnemy] Player bulundu: {pc.name}");
         }
         else
         {
@@ -115,32 +111,24 @@ public class WeepingEnemy : MonoBehaviour
             {
                 navAgent.speed = moveSpeed;
                 navAgent.angularSpeed = rotationSpeed * 100f;
-                navAgent.isStopped = true; // Başlangıçta durgun
+                navAgent.isStopped = true;
             }
         }
-    }
-
-    private void SetupCheckPoints()
-    {
-        // Düşmanın farklı noktalarından görünürlük kontrolü
-        // (merkezden ve kenarlardan)
-        checkPoints = new Vector3[]
-        {
-            Vector3.zero,                    // Merkez
-            Vector3.up * 0.5f,               // Üst
-            Vector3.up * -0.5f,              // Alt
-            Vector3.right * 0.3f,            // Sağ
-            Vector3.left * 0.3f              // Sol
-        };
     }
 
     private void Update()
     {
         if (player == null || playerCamera == null || hasCaughtPlayer) return;
         
-        // Görünürlük kontrolü
+        // Görünürlük kontrolü - BASİT VE GÜVENİLİR
         wasVisible = isVisible;
-        isVisible = CheckVisibility();
+        isVisible = IsInCameraView();
+        
+        // Debug
+        if (showDebugInfo)
+        {
+            Debug.Log($"[WeepingEnemy] isVisible={isVisible}, wasVisible={wasVisible}");
+        }
         
         // Durum değişimi kontrolü
         if (isVisible != wasVisible)
@@ -148,118 +136,100 @@ public class WeepingEnemy : MonoBehaviour
             OnVisibilityChanged(isVisible);
         }
         
-        // Görünmüyorsa hareket et
-        if (!isVisible)
+        // Görünmüyorsa hareket et, görünüyorsa dur
+        if (isVisible)
         {
-            MoveTowardsPlayer();
-            CheckPlayerContact();
+            StopMovement();
         }
         else
         {
-            StopMovement();
+            MoveTowardsPlayer();
+            CheckPlayerContact();
         }
         
         UpdateAnimation();
     }
 
     /// <summary>
-    /// Düşmanın oyuncunun görüş alanında olup olmadığını kontrol eder
+    /// Düşman kameranın görüş alanında mı? (Basit ve güvenilir)
     /// </summary>
-    private bool CheckVisibility()
+    private bool IsInCameraView()
     {
         if (playerCamera == null) return false;
         
-        Vector3 directionToEnemy = transform.position - playerCamera.transform.position;
-        float distanceToEnemy = directionToEnemy.magnitude;
+        // Düşmanın dünya pozisyonunu viewport koordinatlarına çevir
+        Vector3 viewportPos = playerCamera.WorldToViewportPoint(transform.position);
+        
+        // Viewport:
+        // x: 0 = sol kenar, 1 = sağ kenar
+        // y: 0 = alt kenar, 1 = üst kenar  
+        // z: kameradan mesafe (z > 0 = kameranın önünde)
+        
+        // Kameranın arkasında mı?
+        if (viewportPos.z <= 0)
+        {
+            if (showDebugInfo) Debug.Log("[WeepingEnemy] Kameranın arkasında - HAREKET");
+            return false;
+        }
         
         // Mesafe kontrolü
-        if (maxViewDistance > 0 && distanceToEnemy > maxViewDistance)
+        if (maxViewDistance > 0 && viewportPos.z > maxViewDistance)
         {
+            if (showDebugInfo) Debug.Log($"[WeepingEnemy] Çok uzakta: {viewportPos.z:F1}m - HAREKET");
             return false;
         }
         
-        // Açı kontrolü - kameranın baktığı yöne göre
-        float angle = Vector3.Angle(playerCamera.transform.forward, directionToEnemy);
+        // Ekran içinde mi?
+        bool inScreen = viewportPos.x > screenMargin && 
+                        viewportPos.x < (1f - screenMargin) &&
+                        viewportPos.y > screenMargin && 
+                        viewportPos.y < (1f - screenMargin);
         
-        if (angle > viewAngle)
+        if (!inScreen)
         {
-            if (showDebugInfo && Time.time >= nextCheckTime)
+            if (showDebugInfo) Debug.Log($"[WeepingEnemy] Ekran dışında ({viewportPos.x:F2}, {viewportPos.y:F2}) - HAREKET");
+            return false;
+        }
+        
+        // Engel kontrolü (opsiyonel - varsayılan kapalı)
+        if (!disableObstacleCheck)
+        {
+            Vector3 direction = transform.position - playerCamera.transform.position;
+            float distance = direction.magnitude;
+            
+            RaycastHit hit;
+            if (Physics.Raycast(playerCamera.transform.position, direction.normalized, out hit, distance))
             {
-                nextCheckTime = Time.time + 0.5f;
-                Debug.Log($"[WeepingEnemy] Görüş açısı dışında: {angle:F1}° > {viewAngle}°");
-            }
-            return false;
-        }
-        
-        // Frustum (kamera görüş alanı) kontrolü
-        Vector3 viewportPoint = playerCamera.WorldToViewportPoint(transform.position);
-        bool inFrustum = viewportPoint.x > 0 && viewportPoint.x < 1 &&
-                         viewportPoint.y > 0 && viewportPoint.y < 1 &&
-                         viewportPoint.z > 0;
-        
-        if (!inFrustum)
-        {
-            return false;
-        }
-        
-        // Engel kontrolü (Line of Sight)
-        if (useLineOfSight)
-        {
-            // Birden fazla noktadan kontrol et
-            foreach (Vector3 offset in checkPoints)
-            {
-                Vector3 checkPosition = transform.position + transform.TransformDirection(offset);
-                Vector3 rayDirection = (checkPosition - playerCamera.transform.position).normalized;
-                float rayDistance = Vector3.Distance(playerCamera.transform.position, checkPosition);
-                
-                if (!Physics.Raycast(playerCamera.transform.position, rayDirection, rayDistance, obstacleLayer))
+                // Çarpan obje bu düşman değilse, engel var demek
+                if (hit.transform != transform && !hit.transform.IsChildOf(transform))
                 {
-                    // En az bir nokta görünüyor
-                    if (showDebugInfo && Time.time >= nextCheckTime)
-                    {
-                        nextCheckTime = Time.time + 0.5f;
-                        Debug.Log($"[WeepingEnemy] GÖRÜNÜR - Açı: {angle:F1}°, Mesafe: {distanceToEnemy:F1}m");
-                    }
-                    return true;
+                    if (showDebugInfo) Debug.Log($"[WeepingEnemy] Engel: {hit.transform.name} - HAREKET");
+                    return false;
                 }
             }
-            
-            // Tüm noktalar engellendi
-            return false;
         }
         
+        if (showDebugInfo) Debug.Log("[WeepingEnemy] EKRANDA - DONDUR!");
         return true;
     }
 
-    /// <summary>
-    /// Görünürlük durumu değiştiğinde çağrılır
-    /// </summary>
     private void OnVisibilityChanged(bool nowVisible)
     {
         if (nowVisible)
         {
-            // Dondu!
-            if (showDebugInfo)
-                Debug.Log("[WeepingEnemy] DONDU - Oyuncu bakıyor!");
+            Debug.Log("[WeepingEnemy] *** DONDU! ***");
             
-            // Donma sesi
-            if (audioSource != null && freezeSound != null)
+            if (audioSource != null)
             {
                 audioSource.Stop();
-                audioSource.PlayOneShot(freezeSound);
-            }
-            else if (audioSource != null)
-            {
-                audioSource.Stop();
+                if (freezeSound != null)
+                    audioSource.PlayOneShot(freezeSound);
             }
         }
         else
         {
-            // Hareket etmeye başladı!
-            if (showDebugInfo)
-                Debug.Log("[WeepingEnemy] HAREKET - Oyuncu bakmıyor!");
+            Debug.Log("[WeepingEnemy] *** HAREKET EDİYOR! ***");
             
-            // Hareket sesi
             if (audioSource != null && moveSound != null)
             {
                 audioSource.clip = moveSound;
@@ -278,7 +248,6 @@ public class WeepingEnemy : MonoBehaviour
         }
         else
         {
-            // Basit hareket
             Vector3 direction = (player.position - transform.position).normalized;
             direction.y = 0;
             
@@ -305,12 +274,6 @@ public class WeepingEnemy : MonoBehaviour
     {
         float distance = Vector3.Distance(transform.position, player.position);
         
-        if (showDebugInfo && Time.time >= nextCheckTime)
-        {
-            nextCheckTime = Time.time + 0.5f;
-            Debug.Log($"[WeepingEnemy] Oyuncuya mesafe: {distance:F2}m (Yakalama: {damageRadius}m)");
-        }
-        
         if (distance <= damageRadius)
         {
             CatchPlayer();
@@ -322,38 +285,27 @@ public class WeepingEnemy : MonoBehaviour
         if (hasCaughtPlayer) return;
         hasCaughtPlayer = true;
         
-        Debug.Log("[WeepingEnemy] Oyuncu yakalandı!");
+        Debug.Log("[WeepingEnemy] OYUNCU YAKALANDI!");
         
-        // Sesi durdur
         if (audioSource != null)
         {
             audioSource.Stop();
             if (catchSound != null)
-            {
                 audioSource.PlayOneShot(catchSound);
-            }
         }
         
-        // Hareketi durdur
         StopMovement();
         
-        // Kırmızı blink ile başa dön
         BlinkTransition blink = BlinkTransition.Instance;
         LevelManager levelManager = LevelManager.Instance;
         
         if (blink != null && levelManager != null)
         {
-            blink.BlinkError(() => {
-                levelManager.ResetGame();
-            });
+            blink.BlinkError(() => levelManager.ResetGame());
         }
         else if (levelManager != null)
         {
             levelManager.ResetGame();
-        }
-        else
-        {
-            Debug.LogError("[WeepingEnemy] LevelManager bulunamadı!");
         }
     }
 
@@ -365,14 +317,7 @@ public class WeepingEnemy : MonoBehaviour
         
         if (!isVisible)
         {
-            if (useNavMesh && navAgent != null)
-            {
-                speed = navAgent.velocity.magnitude;
-            }
-            else
-            {
-                speed = moveSpeed;
-            }
+            speed = useNavMesh && navAgent != null ? navAgent.velocity.magnitude : moveSpeed;
         }
         
         animator.SetBool(moveAnimParam, speed > 0.1f);
@@ -380,91 +325,57 @@ public class WeepingEnemy : MonoBehaviour
         animator.SetBool(frozenAnimParam, isVisible);
     }
 
-    // Trigger ile temas kontrolü
     private void OnTriggerEnter(Collider other)
     {
         if (hasCaughtPlayer || isVisible) return;
         
-        bool isPlayer = other.CompareTag("Player") || 
-                       other.GetComponent<PlayerController>() != null ||
-                       other.GetComponentInParent<PlayerController>() != null;
-        
-        if (isPlayer)
+        if (other.CompareTag("Player") || 
+            other.GetComponent<PlayerController>() != null ||
+            other.GetComponentInParent<PlayerController>() != null)
         {
             CatchPlayer();
         }
     }
     
-    // Collision ile temas kontrolü
     private void OnCollisionEnter(Collision collision)
     {
         if (hasCaughtPlayer || isVisible) return;
         
-        bool isPlayer = collision.gameObject.CompareTag("Player") || 
-                       collision.gameObject.GetComponent<PlayerController>() != null ||
-                       collision.gameObject.GetComponentInParent<PlayerController>() != null;
-        
-        if (isPlayer)
+        if (collision.gameObject.CompareTag("Player") || 
+            collision.gameObject.GetComponent<PlayerController>() != null ||
+            collision.gameObject.GetComponentInParent<PlayerController>() != null)
         {
             CatchPlayer();
         }
     }
 
-    // Public metodlar
+    public bool IsFrozen() => isVisible;
     
-    /// <summary>
-    /// Düşmanın şu anda donmuş olup olmadığını döndürür
-    /// </summary>
-    public bool IsFrozen()
-    {
-        return isVisible;
-    }
-    
-    /// <summary>
-    /// Düşmanın hareket hızını değiştirir
-    /// </summary>
     public void SetMoveSpeed(float speed)
     {
         moveSpeed = speed;
-        if (navAgent != null)
-        {
-            navAgent.speed = speed;
-        }
+        if (navAgent != null) navAgent.speed = speed;
     }
 
-    // Debug görselleştirme
     private void OnDrawGizmosSelected()
     {
-        // Hasar yarıçapı
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, damageRadius);
         
-        // Görüş açısını çiz
         if (playerCamera != null)
         {
             Gizmos.color = isVisible ? Color.green : Color.cyan;
-            Vector3 cameraPos = playerCamera.transform.position;
-            Vector3 cameraForward = playerCamera.transform.forward;
-            
-            // Görüş çizgisi
-            Gizmos.DrawLine(cameraPos, transform.position);
-        }
-        
-        // Görüş mesafesi
-        if (maxViewDistance > 0)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, maxViewDistance);
+            Gizmos.DrawLine(playerCamera.transform.position, transform.position);
         }
     }
     
     private void OnDrawGizmos()
     {
-        // Runtime'da durumu göster
-        if (Application.isPlaying && showDebugInfo)
+        if (Application.isPlaying)
         {
+            // Yeşil = donmuş, Kırmızı = hareket ediyor
             Gizmos.color = isVisible ? Color.green : Color.red;
-            Gizmos.DrawSphere(transform.position + Vector3.up * 2f, 0.3f);
+            Gizmos.DrawSphere(transform.position + Vector3.up * 2.5f, 0.4f);
         }
     }
 }

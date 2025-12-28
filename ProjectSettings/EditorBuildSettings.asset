@@ -12,14 +12,17 @@ EditorBuildSettings:
     path: Assets/Scenes/Level_0_Tutorial.unity
     guid: 43da858eb943d41548394503fc558f41
   - enabled: 1
-    path: Assets/Scenes/Level_1_Anomaly.unity
+    path: Assets/Scenes/Level_1_Anomaly1.unity
     guid: c2934d4b864dcd34dba140bde644baa0
   - enabled: 1
-    path: Assets/Scenes/Level_1_Anomaly_Cube.unity
+    path: Assets/Scenes/Level_1_Anomaly3.unity
     guid: 57368087109cbe54e992d5c5e71ea76c
   - enabled: 1
-    path: Assets/Scenes/Level_1_Anomaly_Sphere.unity
+    path: Assets/Scenes/Level_1_Anomaly4.unity
     guid: f1b07985ae209344bb61806c93f12ceb
+  - enabled: 1
+    path: Assets/Scenes/Level_1_Anomaly5.unity
+    guid: db7b051a226064a4a9332964495ae0b8
   - enabled: 1
     path: Assets/Scenes/UIMenu.unity
     guid: 1f9ce0849acbaed49ad5805d8a680e85
