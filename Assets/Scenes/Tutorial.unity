@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.3233357, g: 0.34155837, b: 0.3962264, a: 1}
+  m_AmbientSkyColor: {r: 0, g: 0, b: 0, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 0
@@ -863,107 +863,6 @@ RectTransform:
   m_AnchoredPosition: {x: 209.79999, y: 231.4}
   m_SizeDelta: {x: 419.59998, y: 462.8}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1068242912
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1068242914}
-  - component: {fileID: 1068242916}
-  - component: {fileID: 1068242917}
-  m_Layer: 0
-  m_Name: LevelManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1068242914
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1068242912}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.398878, y: -8.309593, z: -23.711683}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1068242916
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1068242912}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: add9dbd6259595b4abb43de2422efc2b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  normalSceneName: Level_0_Tutorial
-  anomalySceneNames:
-  - Level_1_Anomaly
-  - Level_1_Anomaly_Cube
-  - Level_1_Anomaly_Sphere
-  finalSceneName: Final
-  anomalyChance: 0.498
-  winCondition: 8
-  maxConsecutiveNormal: 1
-  maxConsecutiveAnomaly: 4
-  sceneTransitionDelay: 0.3
-  levelText: {fileID: 0}
-  anomalyStatusText: {fileID: 0}
-  showDebugInfo: 1
---- !u!114 &1068242917
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1068242912}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70421d6339df6a048b3044aaecc701ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  blinkDuration: 0.3
-  holdDuration: 0.1
-  blinkCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  normalBlinkColor: {r: 0, g: 0, b: 0, a: 1}
-  errorBlinkColor: {r: 0.8, g: 0, b: 0, a: 1}
-  fadeImage: {fileID: 0}
-  fadeCanvas: {fileID: 0}
 --- !u!1 &1120349916
 GameObject:
   m_ObjectHideFlags: 0
@@ -2400,7 +2299,6 @@ SceneRoots:
   - {fileID: 421127284}
   - {fileID: 695564983}
   - {fileID: 1155139814}
-  - {fileID: 1068242914}
   - {fileID: 619024909}
   - {fileID: 1033450868}
   - {fileID: 936860809}

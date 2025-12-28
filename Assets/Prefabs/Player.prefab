@@ -132,10 +132,12 @@ MonoBehaviour:
   enableHeadbob: 1
   headbobFrequency: 1.5
   headbobAmplitude: 0.1
-  footstepSounds: []
-  jumpSound: {fileID: 0}
+  footstepSounds:
+  - {fileID: 8300000, guid: 0339308dff47b7f4ca15754b224f09c3, type: 3}
+  jumpSound: {fileID: 8300000, guid: ddf1c651349aa804bb2f8d5d664818f6, type: 3}
   landSound: {fileID: 0}
   footstepInterval: 0.5
+  flashlight: {fileID: 0}
 --- !u!114 &6743044692638322912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -168,19 +170,14 @@ MonoBehaviour:
   headbobSmoothSpeed: 10
   swayAmount: 0.02
   swaySpeed: 1.5
-  useBattery: 0
-  maxBattery: 100
+  useBattery: 1
+  maxBattery: 30
   batteryDrainRate: 2
   criticalBatteryThreshold: 0.2
   lowBatteryThreshold: 0.4
   enableFlicker: 1
   flickerMinIntensity: 0.3
   criticalFlickerIntensity: 0.1
-  enableHeatSystem: 0
-  maxHeat: 100
-  heatBuildupRate: 5
-  heatDissipationRate: 8
-  overheatThreshold: 0.8
   turnOnSpeed: 8
   turnOffSpeed: 12
   turnOnCurve:
@@ -236,6 +233,7 @@ MonoBehaviour:
   bulbMeshRenderer: {fileID: 0}
   emissionPropertyName: _EmissionColor
   emissionIntensity: 5
+  handleInputInternally: 0
   toggleKey: 102
   gamepadToggle: 333
   startsOn: 0
