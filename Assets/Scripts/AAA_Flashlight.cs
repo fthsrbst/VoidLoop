@@ -773,8 +773,17 @@ public class AAA_Flashlight : MonoBehaviour
         lowBatteryBeepTimer = 0f;
         lowBatteryBeepInterval = 3f;
         
-        if (turnOnSound != null)
-            audioSource.PlayOneShot(turnOnSound);
+        if (turnOnSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(turnOnSound, 1f);
+            Debug.Log("[AAA_Flashlight] Açma sesi çalındı: " + turnOnSound.name);
+        }
+        else
+        {
+            Debug.LogWarning("[AAA_Flashlight] Açma sesi çalınamadı! turnOnSound: " + 
+                (turnOnSound != null ? turnOnSound.name : "NULL") + 
+                ", audioSource: " + (audioSource != null ? "OK" : "NULL"));
+        }
     }
     
     public void TurnOff()
