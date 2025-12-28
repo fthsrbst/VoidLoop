@@ -39,6 +39,8 @@ public class TutorialManager : MonoBehaviour
         else if (currentStep == 7 && Input.GetKeyDown(KeyCode.Return)) NextStep();
 
         else if (currentStep == 8 && Input.GetKeyDown(KeyCode.Return)) NextStep();
+
+        else if (currentStep == 9 && Input.GetKeyDown(KeyCode.Return)) NextStep();
     }
 
     void ShowStep()
@@ -46,35 +48,38 @@ public class TutorialManager : MonoBehaviour
         switch (currentStep)
         {
             case 0:
-                tutorialText.text = "F tuşu ile feneri kullanabilirsin";
+                tutorialText.text = "You can use the flashlight with the [F] key.";
                 break;
             case 1:
-                tutorialText.text = "Harika! Şimdi yürümeye başla (WASD)";
+                tutorialText.text = "Great! Now start walking with [WASD].";
                 break;
             case 2:
-                tutorialText.text = "Düşmanlardan kaçmayı unutma! (Devam etmek için Enter)";
+                tutorialText.text = "Don't forget to escape from enemies! (Press [Enter] to continue)";
                 break;
             case 3:
-                tutorialText.text = "Eğilmek için Sol Ctrl tuşunu kullan";
+                tutorialText.text = "Use [Left Ctrl] to crouch.";
                 break;
             case 4:
-                tutorialText.text = "Hızlı koşmak için Sol Shift tuşuna basılı tut";
+                tutorialText.text = "Hold [Left Shift] to sprint.";
                 break;
             case 5:
-                tutorialText.text = "Zıplamak için Space tuşuna bas";
+                tutorialText.text = "Press [Space] to jump.";
                 break;
             case 6:
-                tutorialText.text = "<color=red>Kırmızı kapı</color> anomali kapısıdır. Eğer anomali olduğunu düşünüyorsan o kapıdan girmelisin.";
+                tutorialText.text = "The <color=red>Red Door</color> is for anomalies. Enter it if you notice something is wrong.";
                 break;
             case 7:
-                tutorialText.text = "Eğer anomali yoksa <color=blue>mavi kapıya</color> gitmelisin.";
+                tutorialText.text = "If there is no anomaly, you should go to the <color=blue>Blue Door</color>.";
                 break;
-                            case 8:
-                tutorialText.text = "Unutma ilk bölümde mavi kapıdan girmelisin.";
+            case 8:
+                tutorialText.text = "Remember, you must enter the Blue Door in the first level!";
+                break;
+            case 9:
+                tutorialText.text = "The flashlight recharges while it is turned off.";
                 break;
             default:
-                tutorialText.text = "Temel eğitim tamamlandı!";
-                // 3 saniye sonra sahne değiştirme fonksiyonunu çağırır
+                tutorialText.text = "Basic training completed!";
+                // Calls the scene change function after 3 seconds
                 Invoke("LoadNextScene", 3f);
                 break;
         }
