@@ -3,7 +3,17 @@ using UnityEngine;
 /// <summary>
 /// Unity 2022 için First Person Controller
 /// Kullanım: Bu scripti Player objesine ekleyin ve gerekli referansları atayın.
-/// Gamepad ve Klavye/Fare desteği mevcuttur.
+/// 
+/// XBOX GAMEPAD KONTROL ŞEMASI:
+/// - Sol Analog: Hareket
+/// - Sağ Analog: Kamera
+/// - Y: Zıplama
+/// - B: Eğilme
+/// - A: Etkileşim
+/// - X: El feneri toggle
+/// - R2 (Right Trigger): Sprint (basılı tut)
+/// - Sol Analog Tıklama: Sprint Toggle (bir kez bas = koş, tekrar bas = yürü)
+/// - Start: Menü/Cursor Toggle
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -28,7 +38,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool invertY = false;
 
     [Header("Gamepad Ayarları")]
-    [SerializeField] private float gamepadLookSensitivity = 1.2f;
+    [SerializeField] private float gamepadLookSensitivity = 100f;
     [SerializeField] private float gamepadAimAssistDeadzone = 0.15f;
     [Tooltip("Analog stick dead zone değeri")]
     [SerializeField] private float stickDeadzone = 0.1f;
@@ -52,6 +62,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip jumpSound;
     [SerializeField] private AudioClip landSound;
     [SerializeField] private float footstepInterval = 0.5f;
+    
+    [Header("El Feneri Referansı")]
+    [Tooltip("AAA_Flashlight scripti (boş bırakılırsa otomatik bulunur)")]
+    [SerializeField] private AAA_Flashlight flashlight;
 
     // Private değişkenler
     private CharacterController characterController;
@@ -72,7 +86,12 @@ public class PlayerController : MonoBehaviour
     // Gamepad private değişkenler
     private bool isUsingGamepad;
     private bool crouchTogglePressed;
+    private bool sprintTogglePressed;
+    private bool sprintToggleActive; // Sprint toggle durumu
     private float vibrationTimer;
+    
+    // Etkileşim
+    public System.Action OnInteractPressed;
 
     private void Awake()
     {
@@ -111,7 +130,17 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                Debug.LogError("FirstPersonController: Kamera bulunamadı! Lütfen cameraHolder'ı atayın.");
+                Debug.LogError("PlayerController: Kamera bulunamadı! Lütfen cameraHolder'ı atayın.");
+            }
+        }
+        
+        // El fenerini bul
+        if (flashlight == null)
+        {
+            flashlight = GetComponent<AAA_Flashlight>();
+            if (flashlight == null)
+            {
+                flashlight = GetComponentInChildren<AAA_Flashlight>();
             }
         }
     }
@@ -129,6 +158,8 @@ public class PlayerController : MonoBehaviour
         HandleFootsteps();
         HandleLanding();
         HandleVibration();
+        HandleFlashlight();
+        HandleInteraction();
 
         // ESC tuşu veya gamepad Start butonu ile cursor'u serbest bırak
         if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton7))
@@ -180,13 +211,17 @@ public class PlayerController : MonoBehaviour
         
         // Gamepad kullanım tespiti
         isUsingGamepad = gamepadInput.magnitude > 0.1f || 
-                         Mathf.Abs(Input.GetAxis("RightStickHorizontal")) > stickDeadzone || 
-                         Mathf.Abs(Input.GetAxis("RightStickVertical")) > stickDeadzone;
+                         Mathf.Abs(GetRightStickHorizontal()) > stickDeadzone || 
+                         Mathf.Abs(GetRightStickVertical()) > stickDeadzone;
 
-        // Sprint kontrolü (Klavye: Left Shift, Gamepad: Left Stick Click veya Left Bumper)
+        // Sprint kontrolü
+        HandleSprintToggle();
+        
+        // Klavye: Left Shift basılı tutma
         bool sprintKeyboard = Input.GetKey(KeyCode.LeftShift);
-bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
-        isSprinting = (sprintKeyboard || sprintGamepad) && !isCrouching && vertical > 0;
+        
+        // Sprint aktif mi? (Klavye VEYA toggle aktif)
+        isSprinting = (sprintKeyboard || sprintToggleActive) && !isCrouching && vertical > 0;
 
         // Hedef hızı belirle
         float targetSpeed;
@@ -217,13 +252,59 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
         else
         {
             currentMoveVelocity = Vector3.Lerp(currentMoveVelocity, Vector3.zero, deceleration * Time.deltaTime);
+            
+            // Durduğunda sprint toggle'ı kapat
+            if (sprintToggleActive && gamepadInput.magnitude < 0.1f)
+            {
+                // İsteğe bağlı: durduğunda sprint'i kapatmak için bu satırı aktif et
+                // sprintToggleActive = false;
+            }
+        }
+    }
+    
+    private void HandleSprintToggle()
+    {
+        // Xbox: Sol Analog Tıklama (JoystickButton8) - Toggle
+        bool sprintToggleButton = Input.GetKeyDown(KeyCode.JoystickButton8);
+        
+        if (sprintToggleButton)
+        {
+            sprintToggleActive = !sprintToggleActive;
+        }
+        
+        // R2 (Right Trigger) ile koşma - Basılı tutma
+        // Mac ve Windows'ta farklı axis numaraları olabilir
+        float r2TriggerValue = 0f;
+        
+        // Unity Input Manager'da tanımlı axis dene
+        try { r2TriggerValue = Mathf.Max(r2TriggerValue, Input.GetAxis("RightTrigger")); } catch { }
+        
+        // Alternatif axis numaraları (Mac için 6th axis yaygın)
+        try { r2TriggerValue = Mathf.Max(r2TriggerValue, Input.GetAxisRaw("Joystick Axis 6")); } catch { }
+        
+        // 10th axis (bazı controller'larda)
+        try { r2TriggerValue = Mathf.Max(r2TriggerValue, Input.GetAxisRaw("Joystick Axis 10")); } catch { }
+        
+        // R2 basılıysa sprint aktif (0.2 threshold)
+        if (r2TriggerValue > 0.2f)
+        {
+            isSprinting = !isCrouching;
+        }
+        
+        // Eğilince sprint'i kapat
+        if (isCrouching)
+        {
+            sprintToggleActive = false;
         }
     }
 
     private void HandleJump()
     {
-        // Klavye: Space, Gamepad: A butonu (South) - Unity Input Manager "Jump" olarak tanımlı
-        bool jumpPressed = Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.JoystickButton0);
+        // Klavye: Space, Gamepad: Y butonu (Xbox: JoystickButton3)
+        bool jumpKeyboard = Input.GetKeyDown(KeyCode.Space);
+        bool jumpGamepad = Input.GetKeyDown(KeyCode.JoystickButton3); // Y butonu
+        
+        bool jumpPressed = jumpKeyboard || jumpGamepad;
         
         if (jumpPressed && isGrounded && !isCrouching)
         {
@@ -242,36 +323,14 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
 
     private void HandleCrouch()
     {
-        // Klavye: Left Control veya C, Gamepad: B butonu (East) veya Right Stick Click
+        // Klavye: Left Control veya C
+        // Gamepad: B butonu (Xbox: JoystickButton1)
         bool crouchKeyboard = Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.C);
-        bool crouchGamepad = Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.JoystickButton9); // B veya RS
+        bool crouchGamepad = Input.GetKeyDown(KeyCode.JoystickButton1); // B butonu
         
-        // Toggle sistemi için gamepad kontrolü
-        if (!crouchTogglePressed && (Input.GetKey(KeyCode.JoystickButton1) || Input.GetKey(KeyCode.JoystickButton9)))
-        {
-            crouchTogglePressed = true;
-            
-            if (isCrouching)
-            {
-                if (!Physics.Raycast(transform.position, Vector3.up, standingHeight - crouchHeight + 0.1f))
-                {
-                    isCrouching = false;
-                    targetHeight = standingHeight;
-                }
-            }
-            else
-            {
-                isCrouching = true;
-                targetHeight = crouchHeight;
-            }
-        }
-        else if (!Input.GetKey(KeyCode.JoystickButton1) && !Input.GetKey(KeyCode.JoystickButton9))
-        {
-            crouchTogglePressed = false;
-        }
+        bool crouchPressed = crouchKeyboard || crouchGamepad;
         
-        // Klavye crouch kontrolü
-        if (crouchKeyboard)
+        if (crouchPressed)
         {
             if (isCrouching)
             {
@@ -286,6 +345,7 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
             {
                 isCrouching = true;
                 targetHeight = crouchHeight;
+                sprintToggleActive = false; // Eğilince sprint'i kapat
             }
         }
 
@@ -309,6 +369,33 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
             }
         }
     }
+    
+    private void HandleFlashlight()
+    {
+        // Klavye: F
+        bool flashKeyboard = Input.GetKeyDown(KeyCode.F);
+        
+        // Gamepad: X butonu (Xbox: JoystickButton2)
+        bool flashGamepad = Input.GetKeyDown(KeyCode.JoystickButton2); // X butonu
+        
+        if ((flashKeyboard || flashGamepad) && flashlight != null)
+        {
+            flashlight.Toggle();
+        }
+    }
+    
+    
+    private void HandleInteraction()
+    {
+        // Klavye: E, Gamepad: A butonu (Xbox: JoystickButton0)
+        bool interactKeyboard = Input.GetKeyDown(KeyCode.E);
+        bool interactGamepad = Input.GetKeyDown(KeyCode.JoystickButton0); // A butonu
+        
+        if (interactKeyboard || interactGamepad)
+        {
+            OnInteractPressed?.Invoke();
+        }
+    }
 
     private void HandleMouseLook()
     {
@@ -320,8 +407,8 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
         
         // Gamepad sağ analog stick girişi
-        float gamepadLookX = Input.GetAxis("RightStickHorizontal");
-        float gamepadLookY = Input.GetAxis("RightStickVertical");
+        float gamepadLookX = GetRightStickHorizontal();
+        float gamepadLookY = GetRightStickVertical();
         
         // Gamepad dead zone uygula
         Vector2 gamepadLook = new Vector2(gamepadLookX, gamepadLookY);
@@ -334,7 +421,7 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
             // Dead zone'u normalize et ve üstel hızlanma eğrisi uygula
             float normalizedMagnitude = (gamepadLook.magnitude - gamepadAimAssistDeadzone) / (1f - gamepadAimAssistDeadzone);
             normalizedMagnitude = Mathf.Pow(normalizedMagnitude, lookAccelerationCurve);
-            gamepadLook = gamepadLook.normalized * normalizedMagnitude * gamepadLookSensitivity;
+            gamepadLook = gamepadLook.normalized * normalizedMagnitude * gamepadLookSensitivity * Time.deltaTime;
         }
         
         // Her iki girişi birleştir (fare öncelikli)
@@ -355,6 +442,48 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
         {
             cameraHolder.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         }
+    }
+    
+    // Sağ analog stick için yardımcı metodlar
+    // Mac'te axis numaraları farklı olabilir, tüm olasılıkları dene
+    private float GetRightStickHorizontal()
+    {
+        float value = 0f;
+        
+        // Input Manager'da tanımlı axis dene
+        try { value = Input.GetAxis("RightStickHorizontal"); } catch { }
+        if (Mathf.Abs(value) > stickDeadzone) return value;
+        
+        // Mac için alternatif axis numaraları
+        // 3rd axis (axis 2) - bazı Mac controller'larda sağ stick X
+        try { value = Input.GetAxisRaw("Joystick Axis 3"); } catch { }
+        if (Mathf.Abs(value) > stickDeadzone) return value;
+        
+        // 4th axis (axis 3) - Input Manager'daki ayar
+        try { value = Input.GetAxisRaw("Joystick Axis 4"); } catch { }
+        if (Mathf.Abs(value) > stickDeadzone) return value;
+        
+        return value;
+    }
+    
+    private float GetRightStickVertical()
+    {
+        float value = 0f;
+        
+        // Input Manager'da tanımlı axis dene
+        try { value = Input.GetAxis("RightStickVertical"); } catch { }
+        if (Mathf.Abs(value) > stickDeadzone) return value;
+        
+        // Mac için alternatif axis numaraları
+        // 4th axis (axis 3) - bazı Mac controller'larda sağ stick Y
+        try { value = Input.GetAxisRaw("Joystick Axis 4"); } catch { }
+        if (Mathf.Abs(value) > stickDeadzone) return value;
+        
+        // 5th axis (axis 4) - Input Manager'daki ayar
+        try { value = Input.GetAxisRaw("Joystick Axis 5"); } catch { }
+        if (Mathf.Abs(value) > stickDeadzone) return value;
+        
+        return value;
     }
 
     private void HandleHeadbob()
@@ -449,9 +578,6 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
     /// <summary>
     /// Gamepad titreşimini tetikler
     /// </summary>
-    /// <param name="lowFrequency">Düşük frekans motor gücü (0-1)</param>
-    /// <param name="highFrequency">Yüksek frekans motor gücü (0-1)</param>
-    /// <param name="duration">Titreşim süresi (saniye)</param>
     private void TriggerVibration(float lowFrequency, float highFrequency, float duration)
     {
         if (!enableVibration) return;
@@ -494,6 +620,7 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
     public bool IsSprinting() => isSprinting;
     public bool IsCrouching() => isCrouching;
     public bool IsUsingGamepad() => isUsingGamepad;
+    public bool IsSprintToggleActive() => sprintToggleActive;
     public Vector3 GetVelocity() => currentMoveVelocity;
     public float GetCurrentSpeed() => currentMoveVelocity.magnitude;
 
@@ -519,6 +646,11 @@ bool sprintGamepad = Input.GetKey(KeyCode.JoystickButton4);
         {
             StopVibration();
         }
+    }
+    
+    public void SetSprintToggle(bool active)
+    {
+        sprintToggleActive = active;
     }
 
     // Gizmos ile debug görselleştirme

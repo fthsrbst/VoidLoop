@@ -108,6 +108,8 @@ public class AAA_Flashlight : MonoBehaviour
     [SerializeField] private float emissionIntensity = 5f;
     
     [Header("═══════════ KONTROL AYARLARI ═══════════")]
+    [Tooltip("Kendi input handling'ini kullan (PlayerController kullanıyorsan kapat)")]
+    [SerializeField] private bool handleInputInternally = false;
     [SerializeField] private KeyCode toggleKey = KeyCode.F;
     [SerializeField] private KeyCode gamepadToggle = KeyCode.JoystickButton3;
     [SerializeField] private bool startsOn = false;
@@ -459,6 +461,8 @@ public class AAA_Flashlight : MonoBehaviour
     
     private void HandleInput()
     {
+        if (!handleInputInternally) return;
+        
         if (Input.GetKeyDown(toggleKey) || Input.GetKeyDown(gamepadToggle))
         {
             Toggle();
