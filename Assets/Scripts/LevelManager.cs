@@ -22,12 +22,18 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private string finalSceneName = "FinalMap";
     
     [Header("Oyun Ayarları")]
-    [Tooltip("Anomali çıkma olasılığı (0-1)")]
+    [Tooltip("Anomali çıkma olasılığı (0-1). Optimal: 0.35-0.45")]
     [Range(0f, 1f)]
-    [SerializeField] private float anomalyChance = 0.5f;
+    [SerializeField] private float anomalyChance = 0.4f;
     
     [Tooltip("Kaç doğru seçim ile kazanılır")]
     [SerializeField] private int winCondition = 8;
+    
+    [Tooltip("Üst üste maksimum normal sahne sayısı")]
+    [SerializeField] private int maxConsecutiveNormal = 2;
+    
+    [Tooltip("Üst üste maksimum anomali sahne sayısı")]
+    [SerializeField] private int maxConsecutiveAnomaly = 2;
 
     [Header("Geçiş Ayarları")]
     [SerializeField] private float sceneTransitionDelay = 0.3f;
@@ -45,6 +51,8 @@ public class LevelManager : MonoBehaviour
     private static int correctChoices = 0;
     private static int wrongChoices = 0;
     private static List<int> usedAnomalyIndices = new List<int>();
+    private static int consecutiveNormalCount = 0;
+    private static int consecutiveAnomalyCount = 0;
 
     // Properties
     public int CurrentRound => currentRound;
@@ -91,11 +99,14 @@ public class LevelManager : MonoBehaviour
 
     private void DetermineCurrentSceneState(string sceneName)
     {
+        // Varsayılan olarak anomali değil
+        currentSceneIsAnomaly = false;
+        
         if (sceneName == normalSceneName)
         {
             currentSceneIsAnomaly = false;
         }
-        else
+        else if (anomalySceneNames != null)
         {
             // Anomali sahnelerinde mi kontrol et
             foreach (string anomalyScene in anomalySceneNames)
@@ -103,9 +114,14 @@ public class LevelManager : MonoBehaviour
                 if (anomalyScene == sceneName)
                 {
                     currentSceneIsAnomaly = true;
-                    return;
+                    break;
                 }
             }
+        }
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"[LevelManager] DetermineCurrentSceneState: {sceneName} -> Anomaly: {currentSceneIsAnomaly}");
         }
     }
 
@@ -148,8 +164,8 @@ public class LevelManager : MonoBehaviour
         correctChoices++;
         currentRound++;
         
-        // Kazandık mı?
-        if (correctChoices >= winCondition)
+        // Her 8 doğruda finale git (8, 16, 24...)
+        if (correctChoices % winCondition == 0)
         {
             WinGame();
             return;
@@ -171,32 +187,56 @@ public class LevelManager : MonoBehaviour
         // Oyunu sıfırla
         ResetProgress();
         
-        // Normal sahneye dön
-        StartCoroutine(LoadSceneWithDelay(normalSceneName));
+        // Kırmızı blink ile normal sahneye dön
+        StartCoroutine(LoadSceneWithDelayError(normalSceneName));
     }
 
     private void LoadNextScene()
     {
-        // Rastgele anomali mi normal mi?
-        bool willBeAnomaly = Random.value < anomalyChance && 
+        bool willBeAnomaly;
+        
+        // Streak limit kontrolü
+        if (consecutiveNormalCount >= maxConsecutiveNormal)
+        {
+            // Zorla anomali
+            willBeAnomaly = anomalySceneNames != null && anomalySceneNames.Length > 0;
+            if (showDebugInfo)
+                Debug.Log($"[LevelManager] Streak limit: {maxConsecutiveNormal} normal, anomali zorlanıyor");
+        }
+        else if (consecutiveAnomalyCount >= maxConsecutiveAnomaly)
+        {
+            // Zorla normal
+            willBeAnomaly = false;
+            if (showDebugInfo)
+                Debug.Log($"[LevelManager] Streak limit: {maxConsecutiveAnomaly} anomali, normal zorlanıyor");
+        }
+        else
+        {
+            // Normal rastgele seçim
+            willBeAnomaly = Random.value < anomalyChance && 
                             anomalySceneNames != null && 
                             anomalySceneNames.Length > 0 &&
                             usedAnomalyIndices.Count < anomalySceneNames.Length;
+        }
         
         string sceneToLoad;
         
         if (willBeAnomaly)
         {
             sceneToLoad = GetRandomUnusedAnomalyScene();
+            consecutiveAnomalyCount++;
+            consecutiveNormalCount = 0;
         }
         else
         {
             sceneToLoad = normalSceneName;
+            consecutiveNormalCount++;
+            consecutiveAnomalyCount = 0;
         }
         
         if (showDebugInfo)
         {
-            Debug.Log($"[LevelManager] Sıradaki sahne: {sceneToLoad} (Anomali: {willBeAnomaly})");
+            Debug.Log($"[LevelManager] Sıradaki sahne: {sceneToLoad} (Anomali: {willBeAnomaly}, NormalStreak: {consecutiveNormalCount}, AnomalyStreak: {consecutiveAnomalyCount})");
         }
 
         StartCoroutine(LoadSceneWithDelay(sceneToLoad));
@@ -255,6 +295,34 @@ public class LevelManager : MonoBehaviour
             SceneManager.LoadScene(sceneName);
         }
     }
+    
+    /// <summary>
+    /// Kırmızı blink efekti ile sahne yükler (yanlış seçim için)
+    /// </summary>
+    private IEnumerator LoadSceneWithDelayError(string sceneName)
+    {
+        yield return new WaitForSeconds(sceneTransitionDelay);
+        
+        BlinkTransition blink = BlinkTransition.Instance;
+        if (blink != null)
+        {
+            bool sceneLoaded = false;
+            
+            blink.BlinkError(() => {
+                SceneManager.LoadScene(sceneName);
+                sceneLoaded = true;
+            });
+            
+            while (!sceneLoaded)
+            {
+                yield return null;
+            }
+        }
+        else
+        {
+            SceneManager.LoadScene(sceneName);
+        }
+    }
 
     private void WinGame()
     {
@@ -290,6 +358,8 @@ public class LevelManager : MonoBehaviour
         currentRound = 0;
         correctChoices = 0;
         usedAnomalyIndices.Clear();
+        consecutiveNormalCount = 0;
+        consecutiveAnomalyCount = 0;
     }
 
     public void ResetGame()

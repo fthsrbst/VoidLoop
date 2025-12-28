@@ -4,7 +4,7 @@ using System.Collections;
 
 /// <summary>
 /// Göz kırpma efekti ile sahne geçişi.
-/// Canvas üzerinde siyah bir panel ile fade in/out yapar.
+/// Canvas üzerinde siyah veya kırmızı panel ile fade in/out yapar.
 /// </summary>
 public class BlinkTransition : MonoBehaviour
 {
@@ -15,11 +15,16 @@ public class BlinkTransition : MonoBehaviour
     [SerializeField] private float holdDuration = 0.1f;
     [SerializeField] private AnimationCurve blinkCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     
+    [Header("Renk Ayarları")]
+    [SerializeField] private Color normalBlinkColor = Color.black;
+    [SerializeField] private Color errorBlinkColor = new Color(0.8f, 0f, 0f, 1f); // Koyu kırmızı
+    
     [Header("UI Referansları")]
     [SerializeField] private Image fadeImage;
     [SerializeField] private Canvas fadeCanvas;
 
     private bool isTransitioning = false;
+    private Color currentBlinkColor;
 
     private void Awake()
     {
@@ -28,6 +33,7 @@ public class BlinkTransition : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             SetupUI();
+            currentBlinkColor = normalBlinkColor;
         }
         else
         {
@@ -72,12 +78,25 @@ public class BlinkTransition : MonoBehaviour
     }
 
     /// <summary>
-    /// Göz kırpma efekti başlatır ve callback çağırır.
+    /// Normal siyah göz kırpma efekti
     /// </summary>
     public void Blink(System.Action onBlinkPeak = null)
     {
         if (!isTransitioning)
         {
+            currentBlinkColor = normalBlinkColor;
+            StartCoroutine(BlinkRoutine(onBlinkPeak));
+        }
+    }
+    
+    /// <summary>
+    /// Kırmızı blink efekti (yanlış seçim için)
+    /// </summary>
+    public void BlinkError(System.Action onBlinkPeak = null)
+    {
+        if (!isTransitioning)
+        {
+            currentBlinkColor = errorBlinkColor;
             StartCoroutine(BlinkRoutine(onBlinkPeak));
         }
     }
@@ -89,6 +108,7 @@ public class BlinkTransition : MonoBehaviour
     {
         if (!isTransitioning)
         {
+            currentBlinkColor = normalBlinkColor;
             StartCoroutine(FadeRoutine(0, 1, onComplete));
         }
     }
@@ -118,23 +138,26 @@ public class BlinkTransition : MonoBehaviour
         yield return StartCoroutine(FadeRoutine(1, 0, null));
 
         isTransitioning = false;
+        
+        // Rengi normale döndür
+        currentBlinkColor = normalBlinkColor;
     }
 
     private IEnumerator FadeRoutine(float startAlpha, float endAlpha, System.Action onComplete)
     {
         float elapsed = 0f;
-        SetAlpha(startAlpha);
+        SetColorWithAlpha(startAlpha);
 
         while (elapsed < blinkDuration)
         {
             elapsed += Time.unscaledDeltaTime;
             float t = blinkCurve.Evaluate(elapsed / blinkDuration);
             float alpha = Mathf.Lerp(startAlpha, endAlpha, t);
-            SetAlpha(alpha);
+            SetColorWithAlpha(alpha);
             yield return null;
         }
 
-        SetAlpha(endAlpha);
+        SetColorWithAlpha(endAlpha);
         onComplete?.Invoke();
     }
 
@@ -143,6 +166,16 @@ public class BlinkTransition : MonoBehaviour
         if (fadeImage != null)
         {
             Color c = fadeImage.color;
+            c.a = alpha;
+            fadeImage.color = c;
+        }
+    }
+    
+    private void SetColorWithAlpha(float alpha)
+    {
+        if (fadeImage != null)
+        {
+            Color c = currentBlinkColor;
             c.a = alpha;
             fadeImage.color = c;
         }
