@@ -9,7 +9,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject infoPanel;
 
     [Header("Scene To Load On Play")]
-    [SerializeField] private string gameSceneName = "Level_0_Tutorial";
+    [SerializeField] private string gameSceneName = "LoadingScreen";
 
     private void Awake()
     {
