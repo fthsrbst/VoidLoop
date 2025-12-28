@@ -171,7 +171,7 @@ MonoBehaviour:
   swayAmount: 0.02
   swaySpeed: 1.5
   useBattery: 1
-  maxBattery: 30
+  maxBattery: 10
   batteryDrainRate: 2
   criticalBatteryThreshold: 0.2
   lowBatteryThreshold: 0.4
@@ -239,7 +239,7 @@ MonoBehaviour:
   startsOn: 0
   turnOnSound: {fileID: 8300000, guid: 4b42f403fa7cd4c4680ad18bd25c075f, type: 3}
   turnOffSound: {fileID: 8300000, guid: 0339308dff47b7f4ca15754b224f09c3, type: 3}
-  flickerSound: {fileID: 0}
+  flickerSound: {fileID: 8300000, guid: 4b42f403fa7cd4c4680ad18bd25c075f, type: 3}
   lowBatteryBeep: {fileID: 8300000, guid: b2c2ea164302645ecada3aa35a8099c0, type: 3}
   flickerSoundVolume: 0.3
 --- !u!114 &972553540652576919
