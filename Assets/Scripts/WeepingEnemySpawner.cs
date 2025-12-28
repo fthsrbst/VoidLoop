@@ -18,6 +18,9 @@ public class WeepingEnemySpawner : MonoBehaviour
     [Tooltip("Spawn noktası seçim modu")]
     [SerializeField] private SpawnMode spawnMode = SpawnMode.Random;
     
+    [Tooltip("Spawn yüksekliği offset (yerde gömülü kalmaması için)")]
+    [SerializeField] private float spawnHeightOffset = 0.5f;
+    
     [Header("Spawn Davranışı")]
     [SerializeField] private bool spawnOnce = true;
     [SerializeField] private float spawnDelay = 0f;
@@ -246,8 +249,11 @@ public class WeepingEnemySpawner : MonoBehaviour
             }
         }
         
+        // Spawn pozisyonu (yükseklik offset'i ile)
+        Vector3 spawnPosition = point.position + Vector3.up * spawnHeightOffset;
+        
         // Düşmanı spawn et
-        GameObject enemy = Instantiate(weepingEnemyPrefab, point.position, rotation);
+        GameObject enemy = Instantiate(weepingEnemyPrefab, spawnPosition, rotation);
         spawnedEnemies.Add(enemy);
         
         if (showDebugInfo)

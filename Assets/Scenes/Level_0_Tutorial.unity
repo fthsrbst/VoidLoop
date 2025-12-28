@@ -20,13 +20,13 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.3233357, g: 0.34155837, b: 0.3962264, a: 1}
+  m_AmbientSkyColor: {r: 0.21680315, g: 0.32063612, b: 0.5283019, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 0
   m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 0}
+  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -312,6 +312,7 @@ GameObject:
   - component: {fileID: 62011927}
   - component: {fileID: 62011926}
   - component: {fileID: 62011925}
+  - component: {fileID: 62011928}
   m_Layer: 0
   m_Name: SpawnTrigger
   m_TagString: Untagged
@@ -326,7 +327,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 62011924}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3543ded3b1b4e7d478a8000dc696fb0e, type: 3}
   m_Name: 
@@ -374,6 +375,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &62011928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 62011924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edba2d461e2f9445d87a9c3cc3781643, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weepingEnemyPrefab: {fileID: 1342304252108610370, guid: cd4896e287d784fa1aedc7935ba9870a,
+    type: 3}
+  spawnPoints: []
+  spawnMode: 0
+  spawnHeightOffset: 0.5
+  spawnOnce: 1
+  spawnDelay: 0
+  spawnMultiple: 0
+  spawnCount: 1
+  lookAtPlayerOnSpawn: 1
+  spawnEffectPrefab: {fileID: 0}
+  effectDuration: 2
+  spawnSound: {fileID: 0}
+  audioSource: {fileID: 0}
+  showDebugInfo: 0
 --- !u!1 &63407390
 GameObject:
   m_ObjectHideFlags: 0
@@ -1160,6 +1188,37 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &872969715
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 872969716}
+  m_Layer: 0
+  m_Name: WeepingEnemySpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &872969716
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872969715}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -10.32, y: -4.66, z: -13.54}
+  m_LocalScale: {x: 1.9988, y: 1.9988, z: 1.9988}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &936860806
 GameObject:
   m_ObjectHideFlags: 0
@@ -2261,6 +2320,88 @@ MonoBehaviour:
   flickerSound: {fileID: 0}
   lowBatteryBeep: {fileID: 0}
   flickerSoundVolume: 0.3
+--- !u!1 &1555409708
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1555409711}
+  - component: {fileID: 1555409710}
+  - component: {fileID: 1555409709}
+  m_Layer: 0
+  m_Name: SpawnTrigger (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1555409709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1555409708}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edba2d461e2f9445d87a9c3cc3781643, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weepingEnemyPrefab: {fileID: 1342304252108610370, guid: cd4896e287d784fa1aedc7935ba9870a,
+    type: 3}
+  spawnPoints:
+  - {fileID: 2091887770}
+  spawnMode: 2
+  spawnHeightOffset: 0.5
+  spawnOnce: 1
+  spawnDelay: 0
+  spawnMultiple: 0
+  spawnCount: 1
+  lookAtPlayerOnSpawn: 1
+  spawnEffectPrefab: {fileID: 0}
+  effectDuration: 2
+  spawnSound: {fileID: 0}
+  audioSource: {fileID: 0}
+  showDebugInfo: 0
+--- !u!65 &1555409710
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1555409708}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1555409711
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1555409708}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -14.3, y: -4.81, z: -1.42}
+  m_LocalScale: {x: 20.648558, y: 3.6679, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583306503
 GameObject:
   m_ObjectHideFlags: 0
@@ -2778,7 +2919,7 @@ Transform:
   m_GameObject: {fileID: 2091887769}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.32, y: -4.66, z: -13.54}
+  m_LocalPosition: {x: -10.32, y: -3.21, z: -13.54}
   m_LocalScale: {x: 1.9988, y: 1.9988, z: 1.9988}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2854,74 +2995,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &919541279891498320
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1342304252108610370, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_Name
-      value: WeepingEnemy
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 4.518
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -5.365
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.081
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7339060888973060656, guid: cd4896e287d784fa1aedc7935ba9870a,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: cd4896e287d784fa1aedc7935ba9870a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2936,6 +3009,7 @@ SceneRoots:
   - {fileID: 936860809}
   - {fileID: 2137287503}
   - {fileID: 62011927}
+  - {fileID: 1555409711}
   - {fileID: 2091887770}
+  - {fileID: 872969716}
   - {fileID: 1144922853}
-  - {fileID: 919541279891498320}
