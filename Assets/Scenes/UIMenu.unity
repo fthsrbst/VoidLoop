@@ -418,7 +418,7 @@ MonoBehaviour:
   mainMenuPanel: {fileID: 363046938}
   settingsPanel: {fileID: 1991198802}
   infoPanel: {fileID: 338716870}
-  gameSceneName: Level_0_Tutorial
+  gameSceneName: Tutorial
 --- !u!4 &167081156
 Transform:
   m_ObjectHideFlags: 0
