@@ -37,6 +37,8 @@ public class TutorialManager : MonoBehaviour
 
         // 7. ADIM: Mavi Kapı (Enter)
         else if (currentStep == 7 && Input.GetKeyDown(KeyCode.Return)) NextStep();
+
+        else if (currentStep == 8 && Input.GetKeyDown(KeyCode.Return)) NextStep();
     }
 
     void ShowStep()
@@ -66,6 +68,9 @@ public class TutorialManager : MonoBehaviour
                 break;
             case 7:
                 tutorialText.text = "Eğer anomali yoksa <color=blue>mavi kapıya</color> gitmelisin.";
+                break;
+                            case 8:
+                tutorialText.text = "Unutma ilk bölümde mavi kapıdan girmelisin.";
                 break;
             default:
                 tutorialText.text = "Temel eğitim tamamlandı!";
