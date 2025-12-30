@@ -25566,6 +25566,7 @@ GameObject:
   - component: {fileID: 2090851146}
   - component: {fileID: 2090851145}
   - component: {fileID: 2090851144}
+  - component: {fileID: 2090851147}
   m_Layer: 0
   m_Name: SpawnTrigger (1)
   m_TagString: Untagged
@@ -25638,6 +25639,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 84.529, z: 0}
+--- !u!114 &2090851147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2090851143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04d079412b4104648a7be687b2961fa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioClip: {fileID: 8300000, guid: a5bf88a40c923a3468f43a254f732af6, type: 3}
+  volume: 1
+  spatialBlend: 0
+  useTagFilter: 0
+  triggerTag: Player
+  triggerType: 0
+  playOnlyOnce: 1
+  cooldown: 1
+  delay: 0
+  onSoundPlayed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2092641235
 GameObject:
   m_ObjectHideFlags: 0
