@@ -43,7 +43,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private TMPro.TMP_Text anomalyStatusText;
 
     [Header("Debug")]
-    [SerializeField] private bool showDebugInfo = true;
+    [SerializeField] private bool showDebugInfo = false;
 
     // Oyun durumu (static - sahneler arası korunur)
     private static int currentRound = 0;
@@ -411,19 +411,4 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    // Debug UI
-    private void OnGUI()
-    {
-        if (!showDebugInfo) return;
-
-        GUIStyle style = new GUIStyle(GUI.skin.box);
-        style.fontSize = 14;
-        
-        string info = $"Round: {currentRound + 1}\n" +
-                     $"Anomali: {currentSceneIsAnomaly}\n" +
-                     $"Doğru: {correctChoices}/{winCondition}\n" +
-                     $"Yanlış: {wrongChoices}";
-        
-        GUI.Box(new Rect(10, 10, 180, 100), info, style);
-    }
 }
