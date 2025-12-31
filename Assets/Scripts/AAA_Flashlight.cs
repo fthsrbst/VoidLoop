@@ -409,6 +409,13 @@ public class AAA_Flashlight : MonoBehaviour
     
     private void CalculateHeadbob()
     {
+        // Prevent Division by Zero when paused (Time.deltaTime is 0)
+        if (Time.deltaTime < 0.0001f)
+        {
+            cameraVelocity = Vector3.zero;
+            return;
+        }
+
         // Kamera hareket hızını hesapla
         Vector3 currentCamPos = playerCamera.position;
         cameraVelocity = (currentCamPos - lastCameraPosition) / Time.deltaTime;

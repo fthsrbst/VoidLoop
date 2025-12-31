@@ -2587,7 +2587,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ecb11240120dc2449813575e54fe29ab, type: 2}
+  - {fileID: 2100000, guid: 94fafa47ff35fc548af8e87b898b674f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4968,7 +4968,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e2eb328e79796c247b89695b89c34865, type: 2}
+  - {fileID: 2100000, guid: 66e3883ce17c4aa40af330991b880b41, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9839,7 +9839,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e2eb328e79796c247b89695b89c34865, type: 2}
+  - {fileID: 2100000, guid: 66e3883ce17c4aa40af330991b880b41, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -13393,7 +13393,7 @@ Transform:
   m_GameObject: {fileID: 1126827225}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -16.39, y: 10.53, z: 19.11}
+  m_LocalPosition: {x: -54.806, y: 10.53, z: 6.282}
   m_LocalScale: {x: 0.12396, y: 6.821466, z: 2.8470948}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14516,7 +14516,7 @@ Transform:
   m_GameObject: {fileID: 1265106140}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -52.34, y: 10.455, z: 5.898}
+  m_LocalPosition: {x: -16.35, y: 10.455, z: 19.44}
   m_LocalScale: {x: 0.12396, y: 5.848619, z: 3.1894848}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -18687,7 +18687,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ecb11240120dc2449813575e54fe29ab, type: 2}
+  - {fileID: 2100000, guid: 94fafa47ff35fc548af8e87b898b674f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -23470,17 +23470,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalSceneName: Level_0_Tutorial
   anomalySceneNames:
-  - AnomalyChair
-  - AnomalyColon
-  - AnomalyCreature
-  - AnomalyDoll
-  - AnomalyDoor
-  - AnomalyEnemy2
-  - AnomalyPaint
-  - AnomalySofa
-  - AnomalyWeeping
-  - AnomalyWeepingCreature
-  - AnomalyWeepingpaint2
+  - Level_1_AnomalyFollowingCreature
+  - Level_1_AnomalyWeepingEnemy
   finalSceneName: Final
   anomalyChance: 0.498
   winCondition: 8

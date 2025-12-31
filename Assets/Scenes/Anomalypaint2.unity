@@ -1319,12 +1319,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 98201d6bd565d664a9364ea2dcec97e8,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 11.688351
+      value: 11.52
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 98201d6bd565d664a9364ea2dcec97e8,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.8151417
+      value: -4.69
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 98201d6bd565d664a9364ea2dcec97e8,
         type: 3}
@@ -23396,115 +23396,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1906296278}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1911254588
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1911254591}
-  - component: {fileID: 1911254590}
-  - component: {fileID: 1911254589}
-  m_Layer: 0
-  m_Name: LevelManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1911254589
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1911254588}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70421d6339df6a048b3044aaecc701ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  blinkDuration: 0.3
-  holdDuration: 0.1
-  blinkCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  normalBlinkColor: {r: 0, g: 0, b: 0, a: 1}
-  errorBlinkColor: {r: 0.8, g: 0, b: 0, a: 1}
-  fadeImage: {fileID: 0}
-  fadeCanvas: {fileID: 0}
---- !u!114 &1911254590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1911254588}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: add9dbd6259595b4abb43de2422efc2b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  normalSceneName: Level_0_Tutorial
-  anomalySceneNames:
-  - AnomalyChair
-  - AnomalyColon
-  - AnomalyCreature
-  - AnomalyDoll
-  - AnomalyDoor
-  - AnomalyEnemy2
-  - AnomalyPaint
-  - AnomalySofa
-  - AnomalyWeeping
-  - AnomalyWeepingCreature
-  - AnomalyWeepingpaint2
-  finalSceneName: Final
-  anomalyChance: 0.498
-  winCondition: 8
-  maxConsecutiveNormal: 1
-  maxConsecutiveAnomaly: 4
-  sceneTransitionDelay: 0.3
-  levelText: {fileID: 0}
-  anomalyStatusText: {fileID: 0}
-  showDebugInfo: 1
---- !u!4 &1911254591
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1911254588}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.398878, y: -8.309593, z: -23.711683}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1918843307
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25746,12 +25637,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 98201d6bd565d664a9364ea2dcec97e8,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 11.52635
+      value: 11.626
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 98201d6bd565d664a9364ea2dcec97e8,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4.8291416
+      value: -1.532
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 98201d6bd565d664a9364ea2dcec97e8,
         type: 3}
@@ -26421,5 +26312,4 @@ SceneRoots:
   - {fileID: 1155139814}
   - {fileID: 31342710}
   - {fileID: 936860809}
-  - {fileID: 1911254591}
   - {fileID: 883509538}
