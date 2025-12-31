@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 6743044692638322912}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -160,6 +160,7 @@ MonoBehaviour:
   baseSpotAngle: 50
   baseInnerAngle: 25
   baseColor: {r: 1, g: 0.95, b: 0.85, a: 1}
+  flashlightCookie: {fileID: 0}
   holdPosition: {x: 0.3, y: -0.25, z: 0.4}
   lightOffset: {x: 0, y: 0, z: 0.15}
   rotationSmoothSpeed: 8
@@ -174,6 +175,7 @@ MonoBehaviour:
   batteryDrainRate: 1.5
   criticalBatteryThreshold: 0.2
   lowBatteryThreshold: 0.4
+  rechargeRate: 5
   enableFlicker: 1
   flickerMinIntensity: 0.3
   criticalFlickerIntensity: 0.1
@@ -241,6 +243,7 @@ MonoBehaviour:
   flickerSound: {fileID: 8300000, guid: 7d5431156f1be4482b5ea916496cf7af, type: 3}
   lowBatteryBeep: {fileID: 0}
   flickerSoundVolume: 0.3
+  batteryFillObject: {fileID: 0}
 --- !u!1 &4980338825606460014
 GameObject:
   m_ObjectHideFlags: 0

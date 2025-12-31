@@ -51,6 +51,7 @@ public class LevelManager : MonoBehaviour
     [Header("Death Panel")]
     private GameObject deathPanel;
 
+
     [Header("Debug")]
     [SerializeField] private bool showDebugInfo = false;
 
@@ -99,6 +100,7 @@ public class LevelManager : MonoBehaviour
         levelText = null;
         anomalyStatusText = null;
         timerText = null;
+        deathPanel = null;
         deathPanel = null;
         
         UpdateLevelUI();
@@ -167,49 +169,40 @@ public class LevelManager : MonoBehaviour
         if (deathPanel != null)
         {
             deathPanel.SetActive(true);
-            isTimerRunning = false; // Timer'ı durdur
-            
-            // Mouse'u göster
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            
-            // 2 saniye sonra otomatik restart
-            StartCoroutine(AutoRestartAfterDelay(2f));
         }
-    }
-    
-    private IEnumerator AutoRestartAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
+        else
+        {
+            Debug.LogWarning("[LevelManager] DeathPanel bulunamadı! Panel olmadan restart atılıyor.");
+        }
+
+        // Timer'ı durdur
+        isTimerRunning = false; 
         
+        // Oyunu duraklat
+        Time.timeScale = 0f;
+        
+        // Mouse'u göster
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // 2 saniye sonra otomatik restart
+        StartCoroutine(WaitAndRestart());
+    }
+
+    private IEnumerator WaitAndRestart()
+    {
+        // Oyun durduğu için Realtime kullanıyoruz
+        yield return new WaitForSecondsRealtime(2f);
+
+        // Zamanı tekrar başlat
+        Time.timeScale = 1f;
+
         // Timer'ı sıfırla
         elapsedTime = 0f;
-        
+
         // Oyunu sıfırla ve başa dön
         ResetProgress();
         SceneManager.LoadScene(normalSceneName);
-    }
-    
-    private IEnumerator ShowDeathSequence()
-    {
-        // Önce kırmızı blink efekti
-        BlinkTransition blink = BlinkTransition.Instance;
-        if (blink != null)
-        {
-            bool blinkComplete = false;
-            blink.BlinkError(() => {
-                blinkComplete = true;
-            });
-            
-            // Blink'in tamamlanmasını bekle
-            while (!blinkComplete)
-            {
-                yield return null;
-            }
-        }
-        
-        // Sonra ölüm panelini göster
-        ShowDeathPanel();
     }
     
     public float GetElapsedTime()
@@ -307,8 +300,8 @@ public class LevelManager : MonoBehaviour
         // Timer'ı sıfırla
         elapsedTime = 0f;
         
-        // Önce kırmızı blink efekti, sonra ölüm paneli
-        StartCoroutine(ShowDeathSequence());
+        // Ölüm panelini göster
+        ShowDeathPanel();
     }
 
     private void LoadNextScene()
