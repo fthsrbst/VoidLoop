@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -27,7 +28,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private float anomalyChance = 0.4f;
     
     [Tooltip("Kaç doğru seçim ile kazanılır")]
-    [SerializeField] private int winCondition = 8;
+    [SerializeField] private int winCondition = 12;
     
     [Tooltip("Üst üste maksimum normal sahne sayısı")]
     [SerializeField] private int maxConsecutiveNormal = 2;
@@ -41,9 +42,18 @@ public class LevelManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TMPro.TMP_Text levelText;
     [SerializeField] private TMPro.TMP_Text anomalyStatusText;
+    
+    [Header("Timer")]
+    private TMPro.TMP_Text timerText;
+    private static float elapsedTime = 0f;
+    private bool isTimerRunning = false;
+    
+    [Header("Death Panel")]
+    private GameObject deathPanel;
+
 
     [Header("Debug")]
-    [SerializeField] private bool showDebugInfo = true;
+    [SerializeField] private bool showDebugInfo = false;
 
     // Oyun durumu (static - sahneler arası korunur)
     private static int currentRound = 0;
@@ -89,12 +99,115 @@ public class LevelManager : MonoBehaviour
         // UI referanslarını sıfırla ve yeniden bul
         levelText = null;
         anomalyStatusText = null;
+        timerText = null;
+        deathPanel = null;
+        deathPanel = null;
+        
         UpdateLevelUI();
+        FindTimerText();
+        FindDeathPanel();
+        
+        // Final sahnesi değilse timer'ı başlat
+        if (scene.name != finalSceneName)
+        {
+            isTimerRunning = true;
+        }
+        else
+        {
+            isTimerRunning = false;
+        }
         
         if (showDebugInfo)
         {
             Debug.Log($"[LevelManager] Sahne: {scene.name}, Round: {currentRound}, Anomali: {currentSceneIsAnomaly}, Doğru: {correctChoices}");
         }
+    }
+    
+    private void Update()
+    {
+        // Timer'ı güncelle
+        if (isTimerRunning)
+        {
+            elapsedTime += Time.deltaTime;
+            UpdateTimerUI();
+        }
+    }
+    
+    private void FindTimerText()
+    {
+        GameObject textObj = GameObject.Find("timer");
+        if (textObj != null)
+        {
+            timerText = textObj.GetComponent<TMPro.TMP_Text>();
+            UpdateTimerUI();
+        }
+    }
+    
+    private void UpdateTimerUI()
+    {
+        if (timerText != null)
+        {
+            int minutes = Mathf.FloorToInt(elapsedTime / 60f);
+            int seconds = Mathf.FloorToInt(elapsedTime % 60f);
+            int milliseconds = Mathf.FloorToInt((elapsedTime * 100f) % 100f);
+            timerText.text = string.Format("{0:00}:{1:00}:{2:00}", minutes, seconds, milliseconds);
+        }
+    }
+    
+    private void FindDeathPanel()
+    {
+        GameObject panelObj = GameObject.Find("DeathPanel");
+        if (panelObj != null)
+        {
+            deathPanel = panelObj;
+            deathPanel.SetActive(false); // Başlangıçta gizli
+        }
+    }
+    
+    private void ShowDeathPanel()
+    {
+        if (deathPanel != null)
+        {
+            deathPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("[LevelManager] DeathPanel bulunamadı! Panel olmadan restart atılıyor.");
+        }
+
+        // Timer'ı durdur
+        isTimerRunning = false; 
+        
+        // Oyunu duraklat
+        Time.timeScale = 0f;
+        
+        // Mouse'u göster
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // 2 saniye sonra otomatik restart
+        StartCoroutine(WaitAndRestart());
+    }
+
+    private IEnumerator WaitAndRestart()
+    {
+        // Oyun durduğu için Realtime kullanıyoruz
+        yield return new WaitForSecondsRealtime(2f);
+
+        // Zamanı tekrar başlat
+        Time.timeScale = 1f;
+
+        // Timer'ı sıfırla
+        elapsedTime = 0f;
+
+        // Oyunu sıfırla ve başa dön
+        ResetProgress();
+        SceneManager.LoadScene(normalSceneName);
+    }
+    
+    public float GetElapsedTime()
+    {
+        return elapsedTime;
     }
 
     private void DetermineCurrentSceneState(string sceneName)
@@ -184,11 +297,11 @@ public class LevelManager : MonoBehaviour
             Debug.Log("[LevelManager] Yanlış seçim! Başa dönülüyor...");
         }
 
-        // Oyunu sıfırla
-        ResetProgress();
+        // Timer'ı sıfırla
+        elapsedTime = 0f;
         
-        // Kırmızı blink ile normal sahneye dön
-        StartCoroutine(LoadSceneWithDelayError(normalSceneName));
+        // Ölüm panelini göster
+        ShowDeathPanel();
     }
 
     private void LoadNextScene()
@@ -411,19 +524,4 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    // Debug UI
-    private void OnGUI()
-    {
-        if (!showDebugInfo) return;
-
-        GUIStyle style = new GUIStyle(GUI.skin.box);
-        style.fontSize = 14;
-        
-        string info = $"Round: {currentRound + 1}\n" +
-                     $"Anomali: {currentSceneIsAnomaly}\n" +
-                     $"Doğru: {correctChoices}/{winCondition}\n" +
-                     $"Yanlış: {wrongChoices}";
-        
-        GUI.Box(new Rect(10, 10, 180, 100), info, style);
-    }
 }

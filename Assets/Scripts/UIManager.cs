@@ -9,16 +9,19 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject infoPanel;
 
     [Header("Scene To Load On Play")]
-    [SerializeField] private string gameSceneName = "LoadingScreen";
+    [SerializeField] private string gameSceneName = "Level_0_Tutorial";
 
     private void Awake()
     {
-        // PC menü: mouse serbest
+        // PC menÃ¼: mouse serbest
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        // Açýlýþ düzeni
+        // AÃ§Ä±lÄ±ÅŸ dÃ¼zeni
         ShowMainMenu();
+        
+        // Zaman akÄ±ÅŸÄ±nÄ± dÃ¼zelt (pause'dan dÃ¶nÃ¼lmÃ¼ÅŸ olabilir)
+        Time.timeScale = 1f;
     }
 
     public void ShowMainMenu()
@@ -46,22 +49,20 @@ public class UIManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(gameSceneName))
         {
-            Debug.LogWarning("gameSceneName boþ. Inspector'dan Level_0_Tutorial yaz.");
+            Debug.LogWarning("gameSceneName boÅŸ. Inspector'dan Level_0_Tutorial yazmalÄ±sÄ±n.");
             return;
         }
 
-        SceneManager.LoadScene(gameSceneName);
+        // Yeni sistem: LoadingManager Ã¼zerinden git
+        LoadingManager.LoadScene(gameSceneName);
     }
 
     public void QuitGame()
     {
 #if UNITY_EDITOR
-        // Unity Editor'da oyunu kapatmanýn karþýlýðý: Play Mode'u durdurmak
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-    // Build alýnca gerçek uygulamayý kapatýr
-    Application.Quit();
+        Application.Quit();
 #endif
     }
-
 }
