@@ -5,9 +5,6 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
     path: Assets/Scenes/UIMenu.unity
     guid: 1f9ce0849acbaed49ad5805d8a680e85
@@ -24,20 +21,53 @@ EditorBuildSettings:
     path: Assets/Scenes/AnomalyWeepingCreature.unity
     guid: cc561759801f34bdcb5ea69a4af3aa79
   - enabled: 1
-    path: Assets/Scenes/Level_1_Anomaly3.unity
-    guid: 57368087109cbe54e992d5c5e71ea76c
-  - enabled: 1
-    path: Assets/Scenes/Level_1_Anomaly4.unity
-    guid: f1b07985ae209344bb61806c93f12ceb
-  - enabled: 1
-    path: Assets/Scenes/Level_1_Anomaly5.unity
-    guid: db7b051a226064a4a9332964495ae0b8
-  - enabled: 1
     path: Assets/Scenes/Final.unity
     guid: d1e9d36c8aa0bb940842290de250d0ea
   - enabled: 1
+    path: Assets/Scenes/AnomalyColor.unity
+    guid: 6c0afbd201d3544ba8b475cf2b8bc060
+  - enabled: 1
+    path: Assets/Scenes/AnomalyLight.unity
+    guid: efabefb9959824ae79924555938381e6
+  - enabled: 1
+    path: Assets/Scenes/AnomalyLittle.unity
+    guid: f2c8b191c08664633b2b0d0624588b17
+  - enabled: 1
+    path: Assets/Scenes/AnomalyShelve.unity
+    guid: 03e6f486ec61043f4b8231c97a774237
+  - enabled: 1
+    path: Assets/Scenes/AnomalyVibration.unity
+    guid: 93052541ccc644666b5c20c6d10b2732
+  - enabled: 1
     path: Assets/Scenes/ModelMap.unity
     guid: 769bb24976a78114a8556757082b26ab
+  - enabled: 1
+    path: Assets/Scenes/AnomalyChair.unity
+    guid: e536808d2c866462690addcd24ad5b31
+  - enabled: 1
+    path: Assets/Scenes/AnomalyColon.unity
+    guid: 69e9bc1198a5a4191948681519e6a823
+  - enabled: 1
+    path: Assets/Scenes/AnomalyDoll.unity
+    guid: 9e6207159d4d8432497df3bb9c1d53d7
+  - enabled: 1
+    path: Assets/Scenes/AnomalyDoor.unity
+    guid: 754ac0fcf4c1e4756a04cd4a2e430029
+  - enabled: 1
+    path: Assets/Scenes/AnomalyEnemy2.unity
+    guid: 26048b790a73b486cb1819b6a52ae82d
+  - enabled: 1
+    path: Assets/Scenes/AnomalyPaint.unity
+    guid: 673c91390de234af1a5ef4dae1ca14fe
+  - enabled: 1
+    path: Assets/Scenes/Anomalypaint2.unity
+    guid: 4370f82da36cb47df8c762faf04374e2
+  - enabled: 1
+    path: Assets/Scenes/AnomalySofa.unity
+    guid: ab627cdaf5aca40b4ade60f83c4f2042
+  - enabled: 1
+    path: Assets/Scenes/AnomalyWeeping.unity
+    guid: 94d6131fa8bc046e6a6b07a554d247fb
   - enabled: 1
     path: Assets/Scenes/LoadingScreen.unity
     guid: eeb693292ff2bf640a38c555d8610eab

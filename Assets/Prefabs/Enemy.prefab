@@ -120,7 +120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a76392b290b35bd46a1ae86cf35ef0f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
+  moveSpeed: 7
   rotationSpeed: 5
   useNavMesh: 1
   detectionRange: 0
