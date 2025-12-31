@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 /// <summary>
 /// AAA Kalitesinde El Feneri Sistemi
@@ -124,6 +125,10 @@ public class AAA_Flashlight : MonoBehaviour
     [SerializeField] private AudioClip flickerSound;
     [SerializeField] private AudioClip lowBatteryBeep;
     [SerializeField] private float flickerSoundVolume = 0.3f;
+
+    [Header("═══════════ UI SİSTEMİ ═══════════")]
+    [Tooltip("Pil seviyesini gösterecek obje (Image veya 3D Object olabilir)")]
+    [SerializeField] private Transform batteryFillObject;
     
     #endregion
     
@@ -177,6 +182,10 @@ public class AAA_Flashlight : MonoBehaviour
     
     // Light source container
     private GameObject lightContainer;
+
+    // UI Cache
+    private Image batteryFillImage;
+    private Vector3 initialFillScale;
     
     #endregion
     
@@ -227,6 +236,13 @@ public class AAA_Flashlight : MonoBehaviour
         currentIntensityMultiplier = startsOn ? 1f : 0f;
         
         UpdateAllLights();
+        
+        // UI Setup
+        if (batteryFillObject != null)
+        {
+            batteryFillImage = batteryFillObject.GetComponent<Image>();
+            initialFillScale = batteryFillObject.localScale;
+        }
     }
 
     private void Update()
@@ -261,6 +277,7 @@ public class AAA_Flashlight : MonoBehaviour
         }
         
         UpdateAllLights();
+        UpdateBatteryUI();
     }
     
     private void LateUpdate()
@@ -755,6 +772,25 @@ public class AAA_Flashlight : MonoBehaviour
         // Sadece çok kritik seviyede hafif bir sıcaklık ekleyebiliriz veya tamamen iptal edebiliriz.
         // Şimdilik tamamen baseColor dönüyoruz ki "renk değişmesin" isteği tam karşılansın.
         return baseColor;
+    }
+
+    private void UpdateBatteryUI()
+    {
+        if (batteryFillObject == null) return;
+
+        float pct = BatteryPercent;
+
+        if (batteryFillImage != null && batteryFillImage.type == Image.Type.Filled)
+        {
+            batteryFillImage.fillAmount = pct;
+        }
+        else
+        {
+            // Image yoksa veya filled değilse scale kullan (X ekseni)
+            Vector3 targetScale = initialFillScale;
+            targetScale.x = initialFillScale.x * pct;
+            batteryFillObject.localScale = Vector3.Lerp(batteryFillObject.localScale, targetScale, Time.deltaTime * 10f);
+        }
     }
     
     #endregion
