@@ -43,7 +43,6 @@ GameObject:
   - component: {fileID: 7738342492572950452}
   - component: {fileID: 4041379778406243479}
   - component: {fileID: 6743044692638322912}
-  - component: {fileID: 972553540652576919}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -134,8 +133,8 @@ MonoBehaviour:
   headbobAmplitude: 0.1
   footstepSounds:
   - {fileID: 8300000, guid: 8b674eb30f5a64699acfb92a4e0ef611, type: 3}
-  jumpSound: {fileID: 8300000, guid: ddf1c651349aa804bb2f8d5d664818f6, type: 3}
-  landSound: {fileID: 0}
+  jumpSound: {fileID: 0}
+  landSound: {fileID: 8300000, guid: ddf1c651349aa804bb2f8d5d664818f6, type: 3}
   footstepInterval: 0.5
   flashlight: {fileID: 0}
 --- !u!114 &6743044692638322912
@@ -171,8 +170,8 @@ MonoBehaviour:
   swayAmount: 0.02
   swaySpeed: 1.5
   useBattery: 1
-  maxBattery: 10
-  batteryDrainRate: 2
+  maxBattery: 20
+  batteryDrainRate: 1.5
   criticalBatteryThreshold: 0.2
   lowBatteryThreshold: 0.4
   enableFlicker: 1
@@ -236,41 +235,12 @@ MonoBehaviour:
   handleInputInternally: 0
   toggleKey: 102
   gamepadToggle: 333
-  startsOn: 0
+  startsOn: 1
   turnOnSound: {fileID: 8300000, guid: 4b42f403fa7cd4c4680ad18bd25c075f, type: 3}
-  turnOffSound: {fileID: 8300000, guid: 0339308dff47b7f4ca15754b224f09c3, type: 3}
-  flickerSound: {fileID: 8300000, guid: 4b42f403fa7cd4c4680ad18bd25c075f, type: 3}
-  lowBatteryBeep: {fileID: 8300000, guid: b2c2ea164302645ecada3aa35a8099c0, type: 3}
+  turnOffSound: {fileID: 8300000, guid: 4b42f403fa7cd4c4680ad18bd25c075f, type: 3}
+  flickerSound: {fileID: 8300000, guid: 7d5431156f1be4482b5ea916496cf7af, type: 3}
+  lowBatteryBeep: {fileID: 0}
   flickerSoundVolume: 0.3
---- !u!114 &972553540652576919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4256473883744891764}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62a4a9917ec750a48b1be75783541044, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  flashlightLight: {fileID: 0}
-  intensity: 50
-  range: 25
-  spotAngle: 45
-  innerSpotAngle: 25
-  lightColor: {r: 1, g: 1, b: 1, a: 1}
-  headbobCompensation: 0.7
-  compensationSmoothSpeed: 12
-  toggleKey: 102
-  gamepadToggle: 333
-  startsOn: 0
-  toggleOnSound: {fileID: 0}
-  toggleOffSound: {fileID: 0}
-  useBattery: 1
-  maxBattery: 15
-  batteryDrainRate: 1
-  batteryRechargeRate: 0.5
 --- !u!1 &4980338825606460014
 GameObject:
   m_ObjectHideFlags: 0

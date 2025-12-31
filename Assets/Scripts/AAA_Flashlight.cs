@@ -41,6 +41,8 @@ public class AAA_Flashlight : MonoBehaviour
     [SerializeField] private float baseSpotAngle = 50f;
     [SerializeField] private float baseInnerAngle = 25f;
     [SerializeField] private Color baseColor = new Color(1f, 0.95f, 0.85f);
+    [Tooltip("El feneri ışık dokusu (Cookie)")]
+    [SerializeField] private Texture flashlightCookie;
     
     [Header("═══════════ POZİSYON AYARLARI ═══════════")]
     [Tooltip("El fenerinin kameraya göre pozisyonu")]
@@ -83,6 +85,8 @@ public class AAA_Flashlight : MonoBehaviour
     [Tooltip("Bu yüzdenin altında düşük pil modu aktif olur (0-1 arası)")]
     [Range(0f, 1f)]
     [SerializeField] private float lowBatteryThreshold = 0.4f;
+    [Tooltip("Saniye başına pil şarj olma miktarı")]
+    [SerializeField] private float rechargeRate = 5f;
     
     [Header("═══════════ TİTREME (FLICKER) ═══════════")]
     [Tooltip("Pil düşükken titreme aktif olsun mu?")]
@@ -231,8 +235,8 @@ public class AAA_Flashlight : MonoBehaviour
         
         HandleInput();
         
-        // Pil sistemi - sadece useBattery açıksa ve fener açıksa çalışır
-        if (useBattery && isOn)
+        // Pil sistemi
+        if (useBattery)
         {
             HandleBattery();
         }
@@ -344,6 +348,10 @@ public class AAA_Flashlight : MonoBehaviour
         mainSpotlight.shadows = LightShadows.Soft;
         mainSpotlight.shadowStrength = 0.8f;
         mainSpotlight.shadowResolution = LightShadowResolution.High;
+        if (flashlightCookie != null)
+        {
+            mainSpotlight.cookie = flashlightCookie;
+        }
         
         // Dolgu ışığı
         if (fillLight != null)
@@ -426,7 +434,8 @@ public class AAA_Flashlight : MonoBehaviour
         targetRotation = playerCamera.rotation;
         
         // Smooth pozisyon takibi
-        currentPosition = Vector3.SmoothDamp(currentPosition, targetPosition, ref smoothVelocity, 1f / positionSmoothSpeed);
+        float smoothTime = Mathf.Max(0.01f, 1f / Mathf.Max(0.1f, positionSmoothSpeed));
+        currentPosition = Vector3.SmoothDamp(currentPosition, targetPosition, ref smoothVelocity, smoothTime);
         
         // Smooth rotasyon takibi (gecikmeli)
         float rotationStep = rotationSmoothSpeed * Time.deltaTime;
@@ -475,27 +484,39 @@ public class AAA_Flashlight : MonoBehaviour
     
     private void HandleBattery()
     {
-        // Pil tüketimi
-        currentBattery -= batteryDrainRate * Time.deltaTime;
-        
-        if (currentBattery <= 0)
+        if (isOn)
         {
-            currentBattery = 0;
-            ForceTurnOff();
-            return;
-        }
-        
-        // Düşük pil uyarısı
-        if (BatteryPercent <= lowBatteryThreshold && lowBatteryBeep != null)
-        {
-            lowBatteryBeepTimer += Time.deltaTime;
-            if (lowBatteryBeepTimer >= lowBatteryBeepInterval)
+            // Pil tüketimi
+            currentBattery -= batteryDrainRate * Time.deltaTime;
+            
+            if (currentBattery <= 0)
             {
-                audioSource.PlayOneShot(lowBatteryBeep, 0.5f);
-                lowBatteryBeepTimer = 0f;
-                
-                if (BatteryPercent <= criticalBatteryThreshold)
-                    lowBatteryBeepInterval = 1.5f;
+                currentBattery = 0;
+                ForceTurnOff();
+                return;
+            }
+            
+            // Düşük pil uyarısı
+            if (BatteryPercent <= lowBatteryThreshold && lowBatteryBeep != null)
+            {
+                lowBatteryBeepTimer += Time.deltaTime;
+                if (lowBatteryBeepTimer >= lowBatteryBeepInterval)
+                {
+                    audioSource.PlayOneShot(lowBatteryBeep, 0.5f);
+                    lowBatteryBeepTimer = 0f;
+                    
+                    if (BatteryPercent <= criticalBatteryThreshold)
+                        lowBatteryBeepInterval = 1.5f;
+                }
+            }
+        }
+        else
+        {
+            // Pil şarjı
+            if (currentBattery < maxBattery)
+            {
+                currentBattery += rechargeRate * Time.deltaTime;
+                if (currentBattery > maxBattery) currentBattery = maxBattery;
             }
         }
     }
@@ -529,13 +550,13 @@ public class AAA_Flashlight : MonoBehaviour
         
         if (batteryPercent <= criticalBatteryThreshold)
         {
-            // Kritik seviyede çok sık titreme
-            flickerChance = Mathf.Lerp(0.15f, 0.6f, 1f - (batteryPercent / criticalBatteryThreshold));
+            // Kritik seviyede ÇOK SIK titreme (Artırıldı)
+            flickerChance = Mathf.Lerp(0.4f, 0.9f, 1f - (batteryPercent / criticalBatteryThreshold));
         }
         else if (batteryPercent <= lowBatteryThreshold)
         {
-            // Düşük seviyede hafif titreme
-            flickerChance = Mathf.Lerp(0.02f, 0.15f, 1f - ((batteryPercent - criticalBatteryThreshold) / (lowBatteryThreshold - criticalBatteryThreshold)));
+            // Düşük seviyede belirgin titreme (Artırıldı)
+            flickerChance = Mathf.Lerp(0.1f, 0.4f, 1f - ((batteryPercent - criticalBatteryThreshold) / (lowBatteryThreshold - criticalBatteryThreshold)));
         }
         // Pil normalse flickerChance = 0, titreme olmaz
         
@@ -711,7 +732,7 @@ public class AAA_Flashlight : MonoBehaviour
         {
             bulbGlow.enabled = finalMultiplier > 0.01f;
             bulbGlow.intensity = baseIntensity * 0.2f * finalMultiplier;
-            bulbGlow.color = Color.Lerp(currentColor, Color.yellow, 0.3f);
+            bulbGlow.color = currentColor; // Sarı renk karışımını kaldırdım
         }
         
         // Lens flare
@@ -730,24 +751,10 @@ public class AAA_Flashlight : MonoBehaviour
     
     private Color GetBatteryAdjustedColor()
     {
-        float batteryPercent = BatteryPercent;
-        
-        if (batteryPercent >= lowBatteryThreshold)
-        {
-            return baseColor;
-        }
-        else if (batteryPercent >= criticalBatteryThreshold)
-        {
-            Color warmColor = Color.Lerp(baseColor, new Color(1f, 0.7f, 0.4f), 0.3f);
-            float t = (batteryPercent - criticalBatteryThreshold) / (lowBatteryThreshold - criticalBatteryThreshold);
-            return Color.Lerp(warmColor, baseColor, t);
-        }
-        else
-        {
-            Color criticalColor = new Color(1f, 0.5f, 0.2f);
-            float t = batteryPercent / criticalBatteryThreshold;
-            return Color.Lerp(criticalColor, new Color(1f, 0.7f, 0.4f), t);
-        }
+        // Kullanıcı isteği üzerine renk değişimi kapatıldı veya çok aza indirildi
+        // Sadece çok kritik seviyede hafif bir sıcaklık ekleyebiliriz veya tamamen iptal edebiliriz.
+        // Şimdilik tamamen baseColor dönüyoruz ki "renk değişmesin" isteği tam karşılansın.
+        return baseColor;
     }
     
     #endregion
