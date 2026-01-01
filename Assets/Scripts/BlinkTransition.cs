@@ -73,8 +73,9 @@ public class BlinkTransition : MonoBehaviour
             rect.offsetMax = Vector2.zero;
         }
 
-        // Başlangıçta şeffaf
+        // Başlangıçta şeffaf ve raycast kapalı
         SetAlpha(0);
+        if (fadeImage != null) fadeImage.raycastTarget = false;
     }
 
     /// <summary>
@@ -168,6 +169,9 @@ public class BlinkTransition : MonoBehaviour
             Color c = fadeImage.color;
             c.a = alpha;
             fadeImage.color = c;
+            
+            // Alpha düşükken raycast'ı devre dışı bırak - diğer UI elemanlarını engellemez
+            fadeImage.raycastTarget = alpha > 0.01f;
         }
     }
     
@@ -178,6 +182,9 @@ public class BlinkTransition : MonoBehaviour
             Color c = currentBlinkColor;
             c.a = alpha;
             fadeImage.color = c;
+            
+            // Alpha düşükken raycast'ı devre dışı bırak - diğer UI elemanlarını engellemez
+            fadeImage.raycastTarget = alpha > 0.01f;
         }
     }
 
