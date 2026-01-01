@@ -533,8 +533,8 @@ private void HandleFootsteps()
     // Hareket ve yer kontrolü
     if (isGrounded && currentMoveVelocity.magnitude > 0.5f)
     {
-        // %40 SEVİYESİNE ÇIKAR: 0.5f yerine 0.4f yapıldı
-        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.4f, Time.deltaTime * 5f);
+        // %80 SEVİYESİNE ÇIKAR (Orijinalden %20 kısıldı)
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.8f, Time.deltaTime * 5f);
 
         footstepTimer += Time.deltaTime;
 
@@ -546,8 +546,8 @@ private void HandleFootsteps()
             footstepTimer = 0f;
             AudioClip footstep = footstepSounds[Random.Range(0, footstepSounds.Length)];
             
-            // %40 ŞİDDETİNDE ÇAL: 0.5f yerine 0.4f yapıldı
-            audioSource.PlayOneShot(footstep, 0.4f); 
+            // %80 ŞİDDETİNDE ÇAL
+            audioSource.PlayOneShot(footstep, 0.8f); 
         }
     }
     else
