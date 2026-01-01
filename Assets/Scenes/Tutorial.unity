@@ -1887,7 +1887,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fec0bf547b3a3b143bb49b5bf88e9775, type: 2}
   m_sharedMaterial: {fileID: 2642153186457691223, guid: fec0bf547b3a3b143bb49b5bf88e9775,
@@ -1995,6 +1995,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tutorialText: {fileID: 1888591599}
+  textSpeed: 0.05
+  waitBetweenSteps: 2
+  fadeDuration: 1.5
 --- !u!4 &2003124558
 Transform:
   m_ObjectHideFlags: 0
@@ -2085,11 +2088,11 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1120349918}
+  - {fileID: 1033450868}
   - {fileID: 421127284}
   - {fileID: 695564983}
   - {fileID: 1155139814}
   - {fileID: 619024909}
-  - {fileID: 1033450868}
   - {fileID: 936860809}
   - {fileID: 2137287503}
   - {fileID: 2003124558}
