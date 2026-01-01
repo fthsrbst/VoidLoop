@@ -13,12 +13,36 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private float waitBetweenSteps = 2.5f; // Yazı bittikten sonraki bekleme süresi
     [SerializeField] private float startDelay = 2.0f;       // Sahne açıldıktan sonraki ilk bekleme süresi
 
+    // Enter tuşu ile geçiş için değişkenler
+    private bool isTyping = false;           // Yazı yazılıyor mu?
+    private bool skipTyping = false;         // Yazıyı atla
+    private bool skipWaiting = false;        // Beklemeyi atla
+    private string currentFullText = "";     // Mevcut tam metin
+
     void Start()
     {
         // Yazı başlamadan önce metni temizle
         tutorialText.text = "";
         // Otomatik ilerleme döngüsünü başlat
         StartCoroutine(AutoAdvanceWithTypewriter());
+    }
+
+    void Update()
+    {
+        // Enter veya Return tuşuna basıldığında
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            if (isTyping)
+            {
+                // Yazı yazılıyorsa, yazıyı anında tamamla
+                skipTyping = true;
+            }
+            else
+            {
+                // Yazı tamamlandıysa, beklemeyi atla ve sonraki adıma geç
+                skipWaiting = true;
+            }
+        }
     }
 
     IEnumerator AutoAdvanceWithTypewriter()
@@ -29,9 +53,18 @@ public class TutorialManager : MonoBehaviour
         // 2. ADIM: Toplam 11 case (0'dan 10'a kadar) döngüye gir
         while (currentStep <= 10)
         {
-            string fullText = GetStepText(currentStep);
-            yield return StartCoroutine(TypeText(fullText));
-            yield return new WaitForSeconds(waitBetweenSteps);
+            currentFullText = GetStepText(currentStep);
+            yield return StartCoroutine(TypeText(currentFullText));
+            
+            // Bekleme süresi - Enter ile atlanabilir
+            skipWaiting = false;
+            float elapsedTime = 0f;
+            while (elapsedTime < waitBetweenSteps && !skipWaiting)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
             currentStep++;
         }
 
@@ -43,12 +76,23 @@ public class TutorialManager : MonoBehaviour
 
     IEnumerator TypeText(string textToType)
     {
+        isTyping = true;
+        skipTyping = false;
         tutorialText.text = ""; 
+        
         foreach (char letter in textToType.ToCharArray())
         {
+            if (skipTyping)
+            {
+                // Enter'a basıldıysa yazıyı anında tamamla
+                tutorialText.text = textToType;
+                break;
+            }
             tutorialText.text += letter;
             yield return new WaitForSeconds(textSpeed);
         }
+        
+        isTyping = false;
     }
 
     string GetStepText(int step)

@@ -237,11 +237,54 @@ public class AAA_Flashlight : MonoBehaviour
         
         UpdateAllLights();
         
-        // UI Setup
+        // UI Setup - Battery Fill Object otomatik bulma
+        if (batteryFillObject == null)
+        {
+            // Tüm Canvas'larda "fill" objesini ara
+            Canvas[] allCanvases = FindObjectsOfType<Canvas>();
+            Debug.Log("[AAA_Flashlight] Bulunan Canvas sayısı: " + allCanvases.Length);
+            
+            foreach (Canvas canvas in allCanvases)
+            {
+                Debug.Log("[AAA_Flashlight] Canvas kontrol ediliyor: " + canvas.name);
+                batteryFillObject = FindChildRecursive(canvas.transform, "fill");
+                
+                if (batteryFillObject != null)
+                {
+                    Debug.Log("[AAA_Flashlight] Battery Fill Object otomatik bulundu: " + batteryFillObject.name + " (Canvas: " + canvas.name + ")");
+                    break;
+                }
+            }
+            
+            // Canvas'larda bulunamadıysa, tüm sahnede "fill" isimli objeyi ara
+            if (batteryFillObject == null)
+            {
+                GameObject fillObj = GameObject.Find("fill");
+                if (fillObj != null)
+                {
+                    batteryFillObject = fillObj.transform;
+                    Debug.Log("[AAA_Flashlight] Battery Fill Object GameObject.Find ile bulundu: " + batteryFillObject.name);
+                }
+                else
+                {
+                    Debug.LogWarning("[AAA_Flashlight] 'fill' objesi sahnede bulunamadı!");
+                }
+            }
+        }
+        
         if (batteryFillObject != null)
         {
             batteryFillImage = batteryFillObject.GetComponent<Image>();
             initialFillScale = batteryFillObject.localScale;
+            
+            if (batteryFillImage != null)
+            {
+                Debug.Log("[AAA_Flashlight] batteryFillImage bulundu! Image Type: " + batteryFillImage.type + ", FillAmount: " + batteryFillImage.fillAmount);
+            }
+            else
+            {
+                Debug.LogWarning("[AAA_Flashlight] fill objesinde Image component bulunamadı! Scale kullanılacak.");
+            }
         }
     }
 
@@ -887,6 +930,31 @@ public class AAA_Flashlight : MonoBehaviour
     public bool IsCriticalBattery => useBattery && BatteryPercent <= criticalBatteryThreshold;
     public bool IsLowBattery => useBattery && BatteryPercent <= lowBatteryThreshold;
     public float CurrentIntensity => currentIntensityMultiplier * baseIntensity;
+    
+    #endregion
+    
+    #region Helper Methods
+    
+    /// <summary>
+    /// Belirtilen isimde child objeyi recursive olarak arar
+    /// </summary>
+    private Transform FindChildRecursive(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name.Equals(childName, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return child;
+            }
+            
+            Transform found = FindChildRecursive(child, childName);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+        return null;
+    }
     
     #endregion
     
