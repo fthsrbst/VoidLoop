@@ -1083,9 +1083,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pausePanel: {fileID: 3189055813249808972}
   pauseSettingsPanel: {fileID: 0}
+  fadeDuration: 0.3
   resumeButton: {fileID: 0}
   settingsButton: {fileID: 0}
   menuButton: {fileID: 0}
+  closeSettingsButton: {fileID: 0}
   mainMenuSceneName: UIMenu
   disablePauseInMainMenu: 1
   disableWhilePaused:
@@ -2473,7 +2475,7 @@ GameObject:
   - component: {fileID: 1494749106296038236}
   - component: {fileID: 6171186357449253847}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: MusicSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2828,7 +2830,7 @@ GameObject:
   - component: {fileID: 6283298748758892251}
   - component: {fileID: 51353955266159954}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: SFXSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

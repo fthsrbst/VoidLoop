@@ -216,17 +216,29 @@ public class PauseManager : MonoBehaviour
     private void SetupSceneRequirements()
     {
         // 1. Setup Canvas (Sorting Order & Render Mode & GraphicRaycaster)
-        Canvas canvas = GetComponent<Canvas>();
-        if (canvas == null) canvas = GetComponentInParent<Canvas>();
+        // ÖNCELİK: pausePanel'in bağlı olduğu Canvas'ı kullan
+        Canvas canvas = null;
+        
+        if (pausePanel != null)
+        {
+            canvas = pausePanel.GetComponentInParent<Canvas>();
+        }
+        
+        // Fallback: PauseManager'ın kendi Canvas'ına bak
+        if (canvas == null)
+        {
+            canvas = GetComponent<Canvas>();
+            if (canvas == null) canvas = GetComponentInParent<Canvas>();
+        }
 
         if (canvas != null)
         {
             // FORCE OVERLAY MODE for maximum reliability across scene loads
             // This removes dependency on Camera references
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 29999;
+            canvas.sortingOrder = 29999; // BlinkTransition (999) üstünde olmalı
             
-            Debug.Log($"PauseManager: Canvas set to Overlay mode with sortingOrder {canvas.sortingOrder}");
+            Debug.Log($"PauseManager: Canvas '{canvas.name}' set to Overlay mode with sortingOrder {canvas.sortingOrder}");
             
             // Ensure GraphicRaycaster exists
             GraphicRaycaster raycaster = canvas.GetComponent<GraphicRaycaster>();
@@ -388,7 +400,7 @@ public class PauseManager : MonoBehaviour
 
     public void Pause()
     {
-        Debug.Log("PauseManager: Pause called");
+        Debug.Log("=== PauseManager: Pause() START ===");
         if (isPaused) return;
         isPaused = true;
 
@@ -413,7 +425,44 @@ public class PauseManager : MonoBehaviour
         {
             pausePanel.SetActive(true);
             StartCoroutine(FadeCanvasGroup(pausePanelCanvasGroup, 0f, 1f));
+            
+            // DEBUG LOGS
+            Debug.Log($"[DEBUG] pausePanel active: {pausePanel.activeSelf}");
+            Debug.Log($"[DEBUG] pausePanelCanvasGroup null: {pausePanelCanvasGroup == null}");
+            if (pausePanelCanvasGroup != null)
+            {
+                Debug.Log($"[DEBUG] CanvasGroup - alpha: {pausePanelCanvasGroup.alpha}, interactable: {pausePanelCanvasGroup.interactable}, blocksRaycasts: {pausePanelCanvasGroup.blocksRaycasts}");
+            }
+            
+            // Canvas bilgisi
+            Canvas canvas = pausePanel.GetComponentInParent<Canvas>();
+            if (canvas != null)
+            {
+                Debug.Log($"[DEBUG] Canvas found: {canvas.name}, renderMode: {canvas.renderMode}, sortingOrder: {canvas.sortingOrder}");
+                GraphicRaycaster gr = canvas.GetComponent<GraphicRaycaster>();
+                Debug.Log($"[DEBUG] GraphicRaycaster on Canvas: {(gr != null ? "YES" : "NO")}");
+            }
+            else
+            {
+                Debug.LogError("[DEBUG] NO CANVAS FOUND for pausePanel!");
+            }
+            
+            // EventSystem bilgisi
+            var eventSystem = UnityEngine.EventSystems.EventSystem.current;
+            Debug.Log($"[DEBUG] Current EventSystem: {(eventSystem != null ? eventSystem.name : "NULL")}");
+            
+            // Button durumları
+            Debug.Log($"[DEBUG] resumeButton null: {resumeButton == null}");
+            if (resumeButton != null)
+            {
+                Debug.Log($"[DEBUG] resumeButton.interactable: {resumeButton.interactable}, gameObject.active: {resumeButton.gameObject.activeInHierarchy}");
+            }
         }
+        else
+        {
+            Debug.LogError("[DEBUG] pausePanel is NULL!");
+        }
+        Debug.Log("=== PauseManager: Pause() END ===");
     }
 
     public void Resume()
@@ -463,7 +512,62 @@ public class PauseManager : MonoBehaviour
         // Ensure game is paused if opened from outside (rare but possible)
         if (!isPaused) Pause(); // This sets timeScale 0 etc.
 
+        // Bind audio sliders when settings opens
+        BindAudioSliders();
+
         StartCoroutine(SwitchToSettingsRoutine());
+    }
+
+    private void BindAudioSliders()
+    {
+        if (pauseSettingsPanel == null) return;
+
+        // Find sliders in settings panel
+        var sliders = pauseSettingsPanel.GetComponentsInChildren<Slider>(true);
+        
+        float musicVol = PlayerPrefs.GetFloat("VOL_MUSIC", 1f);
+        float sfxVol = PlayerPrefs.GetFloat("VOL_SFX", 1f);
+
+        foreach (var slider in sliders)
+        {
+            if (slider.name == "MusicSlider")
+            {
+                slider.SetValueWithoutNotify(musicVol);
+                slider.onValueChanged.RemoveAllListeners();
+                slider.onValueChanged.AddListener((v) => {
+                    v = Mathf.Clamp01(v);
+                    PlayerPrefs.SetFloat("VOL_MUSIC", v);
+                    PlayerPrefs.Save();
+                    if (BgMusicPersistent.Instance != null)
+                        BgMusicPersistent.Instance.SetVolume(v);
+                });
+            }
+            else if (slider.name == "SFXSlider")
+            {
+                slider.SetValueWithoutNotify(sfxVol);
+                slider.onValueChanged.RemoveAllListeners();
+                slider.onValueChanged.AddListener((v) => {
+                    v = Mathf.Clamp01(v);
+                    PlayerPrefs.SetFloat("VOL_SFX", v);
+                    PlayerPrefs.Save();
+                    // Apply to all non-music audio sources
+                    ApplySfxVolumeToAll(v);
+                });
+            }
+        }
+    }
+
+    private void ApplySfxVolumeToAll(float v)
+    {
+        var allSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        AudioSource musicSource = BgMusicPersistent.Instance?.GetComponent<AudioSource>();
+
+        foreach (var src in allSources)
+        {
+            if (src == null) continue;
+            if (musicSource != null && src == musicSource) continue;
+            src.volume = v;
+        }
     }
 
     private IEnumerator SwitchToSettingsRoutine()

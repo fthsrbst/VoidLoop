@@ -19,32 +19,108 @@ public class AudioSettingsController : MonoBehaviour
     private const string MusicKey = "VOL_MUSIC";
     private const string SfxKey = "VOL_SFX";
 
-    // SFX AudioSource'larýn orijinal (base) volume deðerlerini sakla
-    private readonly Dictionary<int, float> sfxBaseVolumes = new();
+    // SFX AudioSources original base volume values
+    private static readonly Dictionary<int, float> sfxBaseVolumes = new();
+    
+    // Static reference to allow multiple instances to sync
+    private static float cachedMusicVolume = -1f;
+    private static float cachedSfxVolume = -1f;
 
     private void Awake()
     {
-        // Kayýtlý deðerleri al
+        // Auto-find references if missing
+        FindUIReferences();
+
+        // Get saved values
         float musicVol = PlayerPrefs.GetFloat(MusicKey, 1f);
         float sfxVol = PlayerPrefs.GetFloat(SfxKey, 1f);
+        
+        cachedMusicVolume = musicVol;
+        cachedSfxVolume = sfxVol;
 
-        // Sliderlara bas
+        // Set sliders
         if (musicSlider != null) musicSlider.value = musicVol;
         if (sfxSlider != null) sfxSlider.value = sfxVol;
 
-        // Sahnedeki isimli kaynaklarý bul
+        // Find named sources
         BindNamedSources();
 
-        // SFX kaynaklarýný cachele + volume uygula
+        // Cache SFX + apply volume
         CacheSfxSourcesInScene();
         ApplyMusicVolume(musicVol);
         ApplySfxVolume(sfxVol);
 
-        // Slider eventleri
+        // Slider events
         if (musicSlider != null) musicSlider.onValueChanged.AddListener(OnMusicChanged);
         if (sfxSlider != null) sfxSlider.onValueChanged.AddListener(OnSfxChanged);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    
+    private void OnEnable()
+    {
+        // Try finding again in case this was enabled later
+        FindUIReferences();
+
+        // Sync sliders with current values when panel becomes active
+        float musicVol = PlayerPrefs.GetFloat(MusicKey, 1f);
+        float sfxVol = PlayerPrefs.GetFloat(SfxKey, 1f);
+        
+        if (musicSlider != null) 
+        {
+            musicSlider.SetValueWithoutNotify(musicVol);
+            // Re-bind listener just in case
+            musicSlider.onValueChanged.RemoveListener(OnMusicChanged);
+            musicSlider.onValueChanged.AddListener(OnMusicChanged);
+        }
+        
+        if (sfxSlider != null) 
+        {
+            sfxSlider.SetValueWithoutNotify(sfxVol);
+            sfxSlider.onValueChanged.RemoveListener(OnSfxChanged);
+            sfxSlider.onValueChanged.AddListener(OnSfxChanged);
+        }
+    }
+
+    private void FindUIReferences()
+    {
+        if (musicSlider != null && sfxSlider != null) return;
+
+        // Search all sliders including inactive ones
+        var allSliders = Resources.FindObjectsOfTypeAll<Slider>();
+        foreach (var s in allSliders)
+        {
+            // Skip assets (prefabs not in scene)
+            if (s.gameObject.scene.rootCount == 0) continue;
+
+            // Find by slider name directly
+            if (musicSlider == null && s.name == "MusicSlider")
+            {
+                musicSlider = s;
+            }
+            if (sfxSlider == null && s.name == "SFXSlider")
+            {
+                sfxSlider = s;
+            }
+        }
+
+        // Fallback: Find by parent name (Row_Music / Row_SFX)
+        if (musicSlider == null || sfxSlider == null)
+        {
+            foreach (var s in allSliders)
+            {
+                if (s.gameObject.scene.rootCount == 0) continue;
+
+                if (musicSlider == null && s.transform.parent != null && s.transform.parent.name == "Row_Music")
+                {
+                    musicSlider = s;
+                }
+                if (sfxSlider == null && s.transform.parent != null && s.transform.parent.name == "Row_SFX")
+                {
+                    sfxSlider = s;
+                }
+            }
+        }
     }
 
     private void OnDestroy()
@@ -54,10 +130,10 @@ public class AudioSettingsController : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Yeni sahnede BgSound/ButtonClick yeniden bulunabilir
+        // Find sources again in new scene
         BindNamedSources();
 
-        // Yeni sahnedeki SFX kaynaklarýný yakala ve volume uygula
+        // Catch new SFX and apply volume
         CacheSfxSourcesInScene();
         ApplyMusicVolume(GetMusicVolume());
         ApplySfxVolume(GetSfxVolume());
@@ -65,18 +141,22 @@ public class AudioSettingsController : MonoBehaviour
 
     private void BindNamedSources()
     {
-        // BgSound bul
-        var bgObj = GameObject.Find(bgSoundObjectName);
-        bgSound = bgObj ? bgObj.GetComponent<AudioSource>() : null;
+        // Try to find via Singleton first
+        if (BgMusicPersistent.Instance != null)
+        {
+            bgSound = BgMusicPersistent.Instance.GetComponent<AudioSource>();
+        }
 
-        // ButtonClick bul (SFX sayýlacak)
+        // Fallback: Find by name
+        if (bgSound == null)
+        {
+            var bgObj = GameObject.Find(bgSoundObjectName);
+            bgSound = bgObj ? bgObj.GetComponent<AudioSource>() : null;
+        }
+
+        // Find ButtonClick (SFX)
         var clickObj = GameObject.Find(buttonClickObjectName);
         buttonClickSource = clickObj ? clickObj.GetComponent<AudioSource>() : null;
-
-        if (bgSound == null)
-            Debug.LogWarning($"AudioSettingsController: '{bgSoundObjectName}' objesinde AudioSource bulunamadý.");
-        if (buttonClickSource == null)
-            Debug.LogWarning($"AudioSettingsController: '{buttonClickObjectName}' objesinde AudioSource bulunamadý.");
     }
 
     private void CacheSfxSourcesInScene()
@@ -87,8 +167,15 @@ public class AudioSettingsController : MonoBehaviour
         {
             if (src == null) continue;
 
-            // SADECE BgSound music; onun dýþýndaki her þey SFX
+            // ONLY BgSound is music; everything else is SFX
             if (bgSound != null && src == bgSound) continue;
+            
+            // Also exclude BgMusicPersistent's AudioSource
+            if (BgMusicPersistent.Instance != null)
+            {
+                var persistentAudio = BgMusicPersistent.Instance.GetComponent<AudioSource>();
+                if (persistentAudio != null && src == persistentAudio) continue;
+            }
 
             int id = src.GetInstanceID();
             if (!sfxBaseVolumes.ContainsKey(id))
@@ -108,15 +195,28 @@ public class AudioSettingsController : MonoBehaviour
         v = Mathf.Clamp01(v);
         SaveSfxVolume(v);
 
-        // Yeni kaynaklar eklenmiþ olabilir
+        // New sources might have been added
         CacheSfxSourcesInScene();
         ApplySfxVolume(v);
     }
 
     private void ApplyMusicVolume(float v)
     {
+        // Apply to BgMusicPersistent (this controls both menu and game music)
+        if (BgMusicPersistent.Instance != null)
+        {
+            BgMusicPersistent.Instance.SetVolume(Mathf.Clamp01(v));
+        }
+
+        // Also apply to local bgSound if different
         if (bgSound != null)
-            bgSound.volume = Mathf.Clamp01(v);
+        {
+            var persistentAudio = BgMusicPersistent.Instance?.GetComponent<AudioSource>();
+            if (persistentAudio == null || bgSound != persistentAudio)
+            {
+                bgSound.volume = Mathf.Clamp01(v);
+            }
+        }
     }
 
     private void ApplySfxVolume(float v)
@@ -127,7 +227,14 @@ public class AudioSettingsController : MonoBehaviour
         foreach (var src in allSources)
         {
             if (src == null) continue;
-            if (bgSound != null && src == bgSound) continue; // BgSound hariç hepsi SFX
+            if (bgSound != null && src == bgSound) continue; // Skip BgSound
+            
+            // Also skip BgMusicPersistent's AudioSource
+            if (BgMusicPersistent.Instance != null)
+            {
+                var persistentAudio = BgMusicPersistent.Instance.GetComponent<AudioSource>();
+                if (persistentAudio != null && src == persistentAudio) continue;
+            }
 
             int id = src.GetInstanceID();
             if (sfxBaseVolumes.TryGetValue(id, out float baseVol))
@@ -141,12 +248,14 @@ public class AudioSettingsController : MonoBehaviour
     {
         PlayerPrefs.SetFloat(MusicKey, v);
         PlayerPrefs.Save();
+        cachedMusicVolume = v;
     }
 
     private void SaveSfxVolume(float v)
     {
         PlayerPrefs.SetFloat(SfxKey, v);
         PlayerPrefs.Save();
+        cachedSfxVolume = v;
     }
 
     private float GetMusicVolume() => PlayerPrefs.GetFloat(MusicKey, 1f);

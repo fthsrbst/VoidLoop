@@ -3812,6 +3812,69 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 360443024}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &361811198
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 361811200}
+  - component: {fileID: 361811199}
+  m_Layer: 0
+  m_Name: StoryManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &361811199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 361811198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65a04ab7a9263485c83ea17fdc362ee0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  storyLines:
+  - Where... Where is this place?
+  - Where did I fall?
+  - What is this dark void?
+  - I need to find a way out of here...
+  customFont: {fileID: 11400000, guid: 97388ea8e63f1024d95c83929256d616, type: 2}
+  typewriterSpeed: 0.05
+  delayBetweenLines: 2
+  fadeInDuration: 0.5
+  fadeOutDuration: 1
+  startDelay: 1
+  textColor: {r: 1, g: 1, b: 1, a: 1}
+  fontSize: 36
+  bottomOffset: 80
+  enableOutline: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 0.3
+  forceShowStory: 0
+  showDebugLogs: 1
+--- !u!4 &361811200
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 361811198}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 41.342823, y: 458.14093, z: -2729.9233}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &371123114
 GameObject:
   m_ObjectHideFlags: 0
@@ -23913,7 +23976,7 @@ MonoBehaviour:
   - AnomalyShelve
   - AnomalyVibration
   finalSceneName: Final
-  anomalyChance: 0.498
+  anomalyChance: 0.5
   winCondition: 12
   maxConsecutiveNormal: 1
   maxConsecutiveAnomaly: 4
@@ -26854,3 +26917,4 @@ SceneRoots:
   - {fileID: 936860809}
   - {fileID: 1911254591}
   - {fileID: 883509538}
+  - {fileID: 361811200}
