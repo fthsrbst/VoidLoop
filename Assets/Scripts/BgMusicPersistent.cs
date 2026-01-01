@@ -5,6 +5,8 @@ public class BgMusicPersistent : MonoBehaviour
 {
     private static BgMusicPersistent instance;
 
+    public static BgMusicPersistent Instance => instance;
+
     [Header("Scene Configuration")]
     [Tooltip("Main Menu sahnesinin tam adı")]
     [SerializeField] private string menuSceneName = "MainMenu";
@@ -117,5 +119,14 @@ public class BgMusicPersistent : MonoBehaviour
         audioSource.clip = clip;
         audioSource.volume = volume;
         audioSource.Play();
+    }
+
+    public void SetVolume(float newVolume)
+    {
+        volume = newVolume;
+        if (audioSource != null)
+        {
+            audioSource.volume = volume;
+        }
     }
 }

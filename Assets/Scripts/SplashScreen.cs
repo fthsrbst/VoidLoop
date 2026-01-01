@@ -1,107 +1,96 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
-/// <summary>
-/// Professional splash screen controller with fade-in/fade-out animation.
-/// Displays the studio logo after Unity splash, then transitions to main menu.
-/// </summary>
 public class SplashScreen : MonoBehaviour
 {
-    [Header("Splash Settings")]
-    [Tooltip("Duration of the fade-in animation in seconds")]
+    [Header("Fade Settings")]
     [SerializeField] private float fadeInDuration = 1.5f;
-    
-    [Tooltip("Duration to hold the logo on screen in seconds")]
-    [SerializeField] private float holdDuration = 2.0f;
-    
-    [Tooltip("Duration of the fade-out animation in seconds")]
+    [SerializeField] private float displayDuration = 2f;
     [SerializeField] private float fadeOutDuration = 1.5f;
     
-    [Tooltip("Name of the scene to load after splash")]
+    [Header("Next Scene")]
     [SerializeField] private string nextSceneName = "UIMenu";
     
-    [Header("References")]
-    [Tooltip("The logo image to fade")]
-    [SerializeField] private Image logoImage;
-
+    private Image fadeImage;
+    private Canvas fadeCanvas;
+    
     private void Start()
     {
-        // Ensure we start with the logo invisible
-        if (logoImage != null)
-        {
-            Color c = logoImage.color;
-            c.a = 0f;
-            logoImage.color = c;
-        }
-        
-        // Start the splash sequence immediately
+        CreateFadeCanvas();
         StartCoroutine(SplashSequence());
     }
-
-    /// <summary>
-    /// Main splash screen sequence: fade in -> hold -> fade out -> load next scene
-    /// </summary>
+    
+    private void CreateFadeCanvas()
+    {
+        // Create fade canvas
+        GameObject canvasObj = new GameObject("FadeCanvas");
+        fadeCanvas = canvasObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = 999;
+        
+        // Add CanvasScaler
+        CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        
+        // Add GraphicRaycaster
+        canvasObj.AddComponent<GraphicRaycaster>();
+        
+        // Create fade image
+        GameObject imageObj = new GameObject("FadeImage");
+        imageObj.transform.SetParent(canvasObj.transform, false);
+        
+        fadeImage = imageObj.AddComponent<Image>();
+        fadeImage.color = Color.black;
+        
+        // Set to fill entire screen
+        RectTransform rectTransform = fadeImage.GetComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.sizeDelta = Vector2.zero;
+        rectTransform.anchoredPosition = Vector2.zero;
+    }
+    
     private IEnumerator SplashSequence()
     {
-        // Fade in logo
-        yield return StartCoroutine(FadeLogo(0f, 1f, fadeInDuration));
+        // Start with black screen (fade image fully visible)
+        fadeImage.color = new Color(0, 0, 0, 1);
         
-        // Hold (only if duration > 0)
-        if (holdDuration > 0f)
-        {
-            yield return new WaitForSeconds(holdDuration);
-        }
+        // Fade In (black -> transparent, revealing splash content)
+        yield return StartCoroutine(Fade(1f, 0f, fadeInDuration));
         
-        // Fade out logo
-        yield return StartCoroutine(FadeLogo(1f, 0f, fadeOutDuration));
+        // Display splash screen content
+        yield return new WaitForSeconds(displayDuration);
         
-        // Load the main menu scene immediately after fade out
+        // Fade Out (transparent -> black)
+        yield return StartCoroutine(Fade(0f, 1f, fadeOutDuration));
+        
+        // Load next scene
         SceneManager.LoadScene(nextSceneName);
     }
-
-    /// <summary>
-    /// Smoothly fades the logo image alpha from start to end value.
-    /// </summary>
-    private IEnumerator FadeLogo(float startAlpha, float endAlpha, float duration)
+    
+    private IEnumerator Fade(float startAlpha, float endAlpha, float duration)
     {
-        if (logoImage == null)
-        {
-            Debug.LogWarning("SplashScreen: Logo Image is not assigned!");
-            yield break;
-        }
-
-        // Skip if duration is zero or negative
-        if (duration <= 0f)
-        {
-            Color c = logoImage.color;
-            c.a = endAlpha;
-            logoImage.color = c;
-            yield break;
-        }
-
         float elapsed = 0f;
-        Color logoColor = logoImage.color;
-        logoColor.a = startAlpha;
-        logoImage.color = logoColor;
+        Color color = fadeImage.color;
         
         while (elapsed < duration)
         {
-            elapsed += Time.unscaledDeltaTime; // Use unscaled time for consistency
+            elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
             
-            // Smooth step for professional feel
-            float smoothT = t * t * (3f - 2f * t);
-            logoColor.a = Mathf.Lerp(startAlpha, endAlpha, smoothT);
-            logoImage.color = logoColor;
+            // Smooth easing
+            t = t * t * (3f - 2f * t);
+            
+            color.a = Mathf.Lerp(startAlpha, endAlpha, t);
+            fadeImage.color = color;
             
             yield return null;
         }
         
-        // Ensure we reach the exact end value
-        logoColor.a = endAlpha;
-        logoImage.color = logoColor;
+        color.a = endAlpha;
+        fadeImage.color = color;
     }
 }
-

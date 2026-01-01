@@ -512,7 +512,62 @@ public class PauseManager : MonoBehaviour
         // Ensure game is paused if opened from outside (rare but possible)
         if (!isPaused) Pause(); // This sets timeScale 0 etc.
 
+        // Bind audio sliders when settings opens
+        BindAudioSliders();
+
         StartCoroutine(SwitchToSettingsRoutine());
+    }
+
+    private void BindAudioSliders()
+    {
+        if (pauseSettingsPanel == null) return;
+
+        // Find sliders in settings panel
+        var sliders = pauseSettingsPanel.GetComponentsInChildren<Slider>(true);
+        
+        float musicVol = PlayerPrefs.GetFloat("VOL_MUSIC", 1f);
+        float sfxVol = PlayerPrefs.GetFloat("VOL_SFX", 1f);
+
+        foreach (var slider in sliders)
+        {
+            if (slider.name == "MusicSlider")
+            {
+                slider.SetValueWithoutNotify(musicVol);
+                slider.onValueChanged.RemoveAllListeners();
+                slider.onValueChanged.AddListener((v) => {
+                    v = Mathf.Clamp01(v);
+                    PlayerPrefs.SetFloat("VOL_MUSIC", v);
+                    PlayerPrefs.Save();
+                    if (BgMusicPersistent.Instance != null)
+                        BgMusicPersistent.Instance.SetVolume(v);
+                });
+            }
+            else if (slider.name == "SFXSlider")
+            {
+                slider.SetValueWithoutNotify(sfxVol);
+                slider.onValueChanged.RemoveAllListeners();
+                slider.onValueChanged.AddListener((v) => {
+                    v = Mathf.Clamp01(v);
+                    PlayerPrefs.SetFloat("VOL_SFX", v);
+                    PlayerPrefs.Save();
+                    // Apply to all non-music audio sources
+                    ApplySfxVolumeToAll(v);
+                });
+            }
+        }
+    }
+
+    private void ApplySfxVolumeToAll(float v)
+    {
+        var allSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        AudioSource musicSource = BgMusicPersistent.Instance?.GetComponent<AudioSource>();
+
+        foreach (var src in allSources)
+        {
+            if (src == null) continue;
+            if (musicSource != null && src == musicSource) continue;
+            src.volume = v;
+        }
     }
 
     private IEnumerator SwitchToSettingsRoutine()
