@@ -338,6 +338,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4041379778406243479, guid: 0c9aff6f3386d9a4fb6893e262273dfc,
+        type: 3}
+      propertyPath: footstepInterval
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 4256473883744891764, guid: 0c9aff6f3386d9a4fb6893e262273dfc,
         type: 3}
       propertyPath: m_Name
@@ -1997,7 +2002,7 @@ MonoBehaviour:
   tutorialText: {fileID: 1888591599}
   textSpeed: 0.05
   waitBetweenSteps: 2
-  fadeDuration: 1.5
+  startDelay: 2
 --- !u!4 &2003124558
 Transform:
   m_ObjectHideFlags: 0

@@ -524,29 +524,47 @@ public class PlayerController : MonoBehaviour
         characterController.Move(finalMovement * Time.deltaTime);
     }
 
-    private void HandleFootsteps()
+private void HandleFootsteps()
+{
+    // Eksik referans kontrolü
+    if (footstepSounds == null || footstepSounds.Length == 0 || audioSource == null)
+        return;
+
+    // Hareket ve yer kontrolü
+    if (isGrounded && currentMoveVelocity.magnitude > 0.5f)
     {
-        if (footstepSounds == null || footstepSounds.Length == 0 || audioSource == null)
-            return;
+        // Ses seviyesini normale (0.5) yavaşça çıkar
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.5f, Time.deltaTime * 5f);
 
-        if (isGrounded && currentMoveVelocity.magnitude > 0.5f)
-        {
-            footstepTimer += Time.deltaTime;
-            float interval = isSprinting ? footstepInterval * 0.6f : footstepInterval;
+        footstepTimer += Time.deltaTime;
 
-            if (footstepTimer >= interval)
-            {
-                footstepTimer = 0f;
-                AudioClip footstep = footstepSounds[Random.Range(0, footstepSounds.Length)];
-                audioSource.PlayOneShot(footstep, 0.5f);
-            }
-        }
-        else
+        // DÜZENLEME: Koşma çarpanını 0.6f'den 0.75f'e çıkardım ki ses çok hızlı tekrar etmesin
+        float interval = isSprinting ? footstepInterval * 0.75f : footstepInterval;
+
+        if (footstepTimer >= interval)
         {
             footstepTimer = 0f;
+            AudioClip footstep = footstepSounds[Random.Range(0, footstepSounds.Length)];
+            
+            // DÜZENLEME: PlayOneShot kullanırken volume parametresini sabit tutmak daha temiz ses verir
+            audioSource.PlayOneShot(footstep, 0.5f);
         }
     }
-
+    else
+    {
+        footstepTimer = 0f;
+        // Sesi her karede yavaşça sıfıra çek (Fade-out)
+        if (audioSource.volume > 0)
+        {
+            // DÜZENLEME: Durma hızını (2f) biraz artırarak (4f) daha hızlı kesilmesini sağladım
+            audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0, Time.deltaTime * 4f);
+        }
+        else if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+    }
+}
     private void HandleLanding()
     {
         // Yere iniş kontrolü

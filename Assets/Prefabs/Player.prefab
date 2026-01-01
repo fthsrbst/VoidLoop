@@ -132,10 +132,10 @@ MonoBehaviour:
   headbobFrequency: 1.5
   headbobAmplitude: 0.1
   footstepSounds:
-  - {fileID: 8300000, guid: 8b674eb30f5a64699acfb92a4e0ef611, type: 3}
-  jumpSound: {fileID: 0}
-  landSound: {fileID: 8300000, guid: ddf1c651349aa804bb2f8d5d664818f6, type: 3}
-  footstepInterval: 0.5
+  - {fileID: 8300000, guid: 4b39128bde18ab9459efba6dd607bfc0, type: 3}
+  jumpSound: {fileID: 8300000, guid: ddf1c651349aa804bb2f8d5d664818f6, type: 3}
+  landSound: {fileID: 0}
+  footstepInterval: 0.45
   flashlight: {fileID: 0}
 --- !u!114 &6743044692638322912
 MonoBehaviour:
