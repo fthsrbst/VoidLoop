@@ -171,7 +171,7 @@ MonoBehaviour:
   swayAmount: 0.02
   swaySpeed: 1.5
   useBattery: 1
-  maxBattery: 20
+  maxBattery: 30
   batteryDrainRate: 1.5
   criticalBatteryThreshold: 0.2
   lowBatteryThreshold: 0.4
