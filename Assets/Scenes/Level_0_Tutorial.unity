@@ -3846,14 +3846,20 @@ MonoBehaviour:
   - Where did I fall?
   - What is this dark void?
   - I need to find a way out of here...
+  customFont: {fileID: 11400000, guid: 97388ea8e63f1024d95c83929256d616, type: 2}
   typewriterSpeed: 0.05
   delayBetweenLines: 2
   fadeInDuration: 0.5
   fadeOutDuration: 1
   startDelay: 1
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.7}
   textColor: {r: 1, g: 1, b: 1, a: 1}
   fontSize: 36
+  bottomOffset: 80
+  enableOutline: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 0.3
+  forceShowStory: 0
+  showDebugLogs: 1
 --- !u!4 &361811200
 Transform:
   m_ObjectHideFlags: 0
