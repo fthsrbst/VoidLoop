@@ -62,8 +62,8 @@ public class TutorialManager : MonoBehaviour
             case 4: return "Use [Left Ctrl] to crouch.";
             case 5: return "Hold [Left Shift] to sprint.";
             case 6: return "Press [Space] to jump.";
-            case 7: return "The <color=red>Red Door</color> is for anomalies. Enter it if you notice something is wrong.";
-            case 8: return "If there is no anomaly, you should go to the <color=blue>Blue Door</color>.";
+            case 7: return "The 'Red Door' is for anomalies. Enter it if you notice something is wrong.";
+            case 8: return "If there is no anomaly, you should go to the 'Blue Door'.";
             case 9: return "Remember, you must enter the Blue Door in the first level!";
             case 10: return "The flashlight recharges while it is turned off.";
             default: return "";

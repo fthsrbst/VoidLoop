@@ -132,10 +132,10 @@ MonoBehaviour:
   headbobFrequency: 1.5
   headbobAmplitude: 0.1
   footstepSounds:
-  - {fileID: 8300000, guid: 4b39128bde18ab9459efba6dd607bfc0, type: 3}
+  - {fileID: 8300000, guid: 8616f21d65d79194aa0892e83910f749, type: 3}
   jumpSound: {fileID: 8300000, guid: ddf1c651349aa804bb2f8d5d664818f6, type: 3}
   landSound: {fileID: 0}
-  footstepInterval: 0.45
+  footstepInterval: 0.3
   flashlight: {fileID: 0}
 --- !u!114 &6743044692638322912
 MonoBehaviour:
@@ -171,7 +171,7 @@ MonoBehaviour:
   swayAmount: 0.02
   swaySpeed: 1.5
   useBattery: 1
-  maxBattery: 30
+  maxBattery: 50
   batteryDrainRate: 1.5
   criticalBatteryThreshold: 0.2
   lowBatteryThreshold: 0.4

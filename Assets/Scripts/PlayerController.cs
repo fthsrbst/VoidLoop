@@ -533,12 +533,12 @@ private void HandleFootsteps()
     // Hareket ve yer kontrolü
     if (isGrounded && currentMoveVelocity.magnitude > 0.5f)
     {
-        // Ses seviyesini normale (0.5) yavaşça çıkar
-        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.5f, Time.deltaTime * 5f);
+        // %40 SEVİYESİNE ÇIKAR: 0.5f yerine 0.4f yapıldı
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.4f, Time.deltaTime * 5f);
 
         footstepTimer += Time.deltaTime;
 
-        // DÜZENLEME: Koşma çarpanını 0.6f'den 0.75f'e çıkardım ki ses çok hızlı tekrar etmesin
+        // Koşma çarpanı (0.75f)
         float interval = isSprinting ? footstepInterval * 0.75f : footstepInterval;
 
         if (footstepTimer >= interval)
@@ -546,8 +546,8 @@ private void HandleFootsteps()
             footstepTimer = 0f;
             AudioClip footstep = footstepSounds[Random.Range(0, footstepSounds.Length)];
             
-            // DÜZENLEME: PlayOneShot kullanırken volume parametresini sabit tutmak daha temiz ses verir
-            audioSource.PlayOneShot(footstep, 0.5f);
+            // %40 ŞİDDETİNDE ÇAL: 0.5f yerine 0.4f yapıldı
+            audioSource.PlayOneShot(footstep, 0.4f); 
         }
     }
     else
@@ -556,7 +556,6 @@ private void HandleFootsteps()
         // Sesi her karede yavaşça sıfıra çek (Fade-out)
         if (audioSource.volume > 0)
         {
-            // DÜZENLEME: Durma hızını (2f) biraz artırarak (4f) daha hızlı kesilmesini sağladım
             audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0, Time.deltaTime * 4f);
         }
         else if (audioSource.isPlaying)
