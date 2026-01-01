@@ -1,19 +1,55 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement; // Sahne geçişi için gerekli kütüphane
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class TutorialManager : MonoBehaviour
 {
     public TextMeshProUGUI tutorialText;
     private int currentStep = 0;
 
+    [Header("Fade Settings")]
+    [SerializeField] private float fadeDuration = 1.5f;
+    
+    private Image fadeImage;
+    private bool isTransitioning = false;
+
     void Start()
     {
+        CreateFadeOverlay();
         ShowStep();
+    }
+
+    void CreateFadeOverlay()
+    {
+        // Fade için Canvas oluştur
+        GameObject canvasObj = new GameObject("TutorialFadeCanvas");
+        Canvas canvas = canvasObj.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 9999; // En üstte
+        canvasObj.AddComponent<CanvasScaler>();
+        
+        // Fade Image oluştur
+        GameObject imageObj = new GameObject("FadeImage");
+        imageObj.transform.SetParent(canvasObj.transform);
+        
+        fadeImage = imageObj.AddComponent<Image>();
+        fadeImage.color = new Color(0, 0, 0, 0); // Başlangıçta şeffaf
+        fadeImage.raycastTarget = false;
+        
+        // Tam ekran kaplasın
+        RectTransform rect = fadeImage.rectTransform;
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
     }
 
     void Update()
     {
+        if (isTransitioning) return;
+        
         // 0. ADIM: Fener (F)
         if (currentStep == 0 && Input.GetKeyDown(KeyCode.F)) NextStep();
 
@@ -79,8 +115,8 @@ public class TutorialManager : MonoBehaviour
                 break;
             default:
                 tutorialText.text = "Basic training completed!";
-                // Calls the scene change function after 3 seconds
-                Invoke("LoadNextScene", 3f);
+                // 3 saniye sonra fade ile sahne geçişi
+                Invoke("StartFadeTransition", 3f);
                 break;
         }
     }
@@ -91,9 +127,46 @@ public class TutorialManager : MonoBehaviour
         ShowStep();
     }
 
-    void LoadNextScene()
+    void StartFadeTransition()
     {
-        // Level_0_Tutorial isimli sahneye geçiş yapar
+        if (!isTransitioning)
+        {
+            isTransitioning = true;
+            
+            // Önce BlinkTransition'ı dene - o zaten fade in/out yapıyor
+            BlinkTransition blink = BlinkTransition.Instance;
+            if (blink != null)
+            {
+                blink.Blink(() => {
+                    SceneManager.LoadScene("Level_0_Tutorial");
+                });
+            }
+            else
+            {
+                // BlinkTransition yoksa kendi fade'imizi kullan
+                StartCoroutine(FadeAndLoadScene());
+            }
+        }
+    }
+
+    IEnumerator FadeAndLoadScene()
+    {
+        // Siyaha fade out
+        float elapsed = 0f;
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, elapsed / fadeDuration);
+            fadeImage.color = new Color(0, 0, 0, alpha);
+            yield return null;
+        }
+        
+        fadeImage.color = new Color(0, 0, 0, 1f);
+        
+        // Kısa bekleme
+        yield return new WaitForSeconds(0.3f);
+        
+        // Sahneyi yükle (SceneFadeIn component varsa o fade in yapacak)
         SceneManager.LoadScene("Level_0_Tutorial");
     }
 }

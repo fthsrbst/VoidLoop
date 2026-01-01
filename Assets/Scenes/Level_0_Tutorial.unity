@@ -23913,7 +23913,7 @@ MonoBehaviour:
   - AnomalyShelve
   - AnomalyVibration
   finalSceneName: Final
-  anomalyChance: 0.498
+  anomalyChance: 0.5
   winCondition: 12
   maxConsecutiveNormal: 1
   maxConsecutiveAnomaly: 4
