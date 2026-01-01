@@ -482,30 +482,31 @@ public class LevelManager : MonoBehaviour
         SceneManager.LoadScene(normalSceneName);
     }
     
-    private void UpdateLevelUI()
+private void UpdateLevelUI()
+
     {
         if (levelText == null)
         {
             FindLevelText();
         }
-        
+
         if (levelText != null)
         {
             levelText.text = $"Round {currentRound + 1}";
         }
-        
         // Anomali durumu text'ini güncelle
         if (anomalyStatusText == null)
+
         {
             FindAnomalyStatusText();
         }
-        
+
         if (anomalyStatusText != null)
         {
             anomalyStatusText.text = currentSceneIsAnomaly ? "ANOMALY" : "NORMAL";
         }
+
     }
-    
     private void FindLevelText()
     {
         GameObject textObj = GameObject.Find("LevelText");
