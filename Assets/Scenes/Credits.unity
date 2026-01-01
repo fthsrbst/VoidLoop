@@ -223,9 +223,12 @@ MonoBehaviour:
   fadeOutDuration: 1.5
   scrollSpeed: 120
   startYOffset: 230
-  endDelay: 0
   customFont: {fileID: 11400000, guid: 97388ea8e63f1024d95c83929256d616, type: 2}
   baseFontSize: 36
+  studioLogo: {fileID: 21300000, guid: d885370cbd6df4dcd9947afca602bae0, type: 3}
+  logoSize: {x: 1920, y: 1080}
+  logoDisplayDuration: 3
+  logoFadeDuration: 1
   mainMenuSceneName: UIMenu
 --- !u!4 &203172239
 Transform:

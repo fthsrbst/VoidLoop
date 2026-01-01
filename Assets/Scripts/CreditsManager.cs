@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using TMPro;
 
 /// <summary>
-/// Professional credits screen manager with scrolling text.
+/// Professional credits screen manager with scrolling text and studio logo.
 /// Self-contained - creates its own UI elements with fade in/out.
 /// Credits start from bottom edge of screen and scroll upward until completely off-screen.
 /// </summary>
@@ -22,15 +22,25 @@ public class CreditsManager : MonoBehaviour
     [Tooltip("Starting Y position offset. 0 = bottom of screen, positive = higher up")]
     [SerializeField] private float startYOffset = 0f;
     
-    [Tooltip("Extra delay after credits finish before fade out")]
-    [SerializeField] private float endDelay = 1f;
-    
     [Header("Font Settings")]
     [Tooltip("Optional: Custom font for credits text. Leave empty to use default.")]
     [SerializeField] private TMP_FontAsset customFont;
     
     [Tooltip("Base font size for credits text")]
     [SerializeField] private float baseFontSize = 36f;
+    
+    [Header("Studio Logo Settings")]
+    [Tooltip("Studio logo sprite to show after credits")]
+    [SerializeField] private Sprite studioLogo;
+    
+    [Tooltip("Size of the logo (width, height)")]
+    [SerializeField] private Vector2 logoSize = new Vector2(400, 400);
+    
+    [Tooltip("How long the logo stays visible")]
+    [SerializeField] private float logoDisplayDuration = 3f;
+    
+    [Tooltip("Logo fade in/out duration")]
+    [SerializeField] private float logoFadeDuration = 1f;
     
     [Header("Scene Settings")]
     [SerializeField] private string mainMenuSceneName = "UIMenu";
@@ -69,7 +79,6 @@ And finally... you found freedom.</i></size>
 
 
 
-
 <size=38><b>Fatih Serbest</b></size>
 <size=26>Lead Game Developer
 Programming & Game Design</size>
@@ -87,7 +96,6 @@ Environment Design & Level Art</size>
 <size=38><b>Mülayim Can Parmak</b></size>
 <size=26>SFX/VFX Artist & UI Designer
 Audio Design & Visual Effects & Game Developer</size>
-
 
 
 
@@ -121,6 +129,7 @@ Your feedback made this journey worthwhile.</size>
     private Canvas canvas;
     private CanvasScaler canvasScaler;
     private Image fadeOverlay;
+    private Image logoImage;
     private RectTransform creditsTextRT;
     private TextMeshProUGUI creditsTextTMP;
     
@@ -185,6 +194,21 @@ Your feedback made this journey worthwhile.</size>
         creditsTextRT.pivot = new Vector2(0.5f, 1f); // Top-center pivot
         creditsTextRT.sizeDelta = new Vector2(0, 0);
         
+        // Create studio logo (centered, hidden initially)
+        GameObject logoObj = new GameObject("StudioLogo");
+        logoObj.transform.SetParent(canvasObj.transform, false);
+        logoImage = logoObj.AddComponent<Image>();
+        logoImage.sprite = studioLogo;
+        logoImage.preserveAspect = true;
+        logoImage.color = new Color(1, 1, 1, 0); // Start invisible
+        logoImage.raycastTarget = false;
+        RectTransform logoRT = logoImage.rectTransform;
+        logoRT.anchorMin = new Vector2(0.5f, 0.5f);
+        logoRT.anchorMax = new Vector2(0.5f, 0.5f);
+        logoRT.pivot = new Vector2(0.5f, 0.5f);
+        logoRT.sizeDelta = logoSize;
+        logoRT.anchoredPosition = Vector2.zero;
+        
         // Create fade overlay (on top of everything)
         GameObject fadeObj = new GameObject("FadeOverlay");
         fadeObj.transform.SetParent(canvasObj.transform, false);
@@ -222,13 +246,7 @@ Your feedback made this journey worthwhile.</size>
         // Fade in from black
         yield return StartCoroutine(Fade(1f, 0f, fadeInDuration));
         
-        // Calculate total scroll distance:
-        // Text needs to travel until its BOTTOM edge goes above the TOP of the screen
-        // Start position: text top is at y=0 (bottom of screen)
-        // End position: text bottom is above screen top
-        // Text bottom starts at: 0 - textHeight = -textHeight
-        // Text bottom should end at: referenceHeight (above screen)
-        // Distance = referenceHeight - (-textHeight) = referenceHeight + textHeight
+        // Calculate total scroll distance
         float totalScrollDistance = referenceHeight + textHeight;
         float scrolled = 0f;
         
@@ -241,14 +259,27 @@ Your feedback made this journey worthwhile.</size>
             yield return null;
         }
         
-        // Wait at the end
-        yield return new WaitForSeconds(endDelay);
+        // Hide credits text
+        creditsTextTMP.gameObject.SetActive(false);
+        
+        // Show studio logo if assigned
+        if (studioLogo != null)
+        {
+            // Fade in logo
+            yield return StartCoroutine(FadeImage(logoImage, 0f, 1f, logoFadeDuration));
+            
+            // Display logo
+            yield return new WaitForSeconds(logoDisplayDuration);
+            
+            // Fade out logo
+            yield return StartCoroutine(FadeImage(logoImage, 1f, 0f, logoFadeDuration));
+        }
         
         // Fade out to black
         yield return StartCoroutine(Fade(0f, 1f, fadeOutDuration));
         
         // Small delay before scene change
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.3f);
         
         // Return to main menu
         SceneManager.LoadScene(mainMenuSceneName);
@@ -265,8 +296,7 @@ Your feedback made this journey worthwhile.</size>
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
-            // Smooth step interpolation for nice easing
-            t = t * t * (3f - 2f * t);
+            t = t * t * (3f - 2f * t); // Smooth step
             
             fadeColor.a = Mathf.Lerp(startAlpha, endAlpha, t);
             fadeOverlay.color = fadeColor;
@@ -276,5 +306,28 @@ Your feedback made this journey worthwhile.</size>
         
         fadeColor.a = endAlpha;
         fadeOverlay.color = fadeColor;
+    }
+    
+    private IEnumerator FadeImage(Image image, float startAlpha, float endAlpha, float duration)
+    {
+        if (image == null) yield break;
+        
+        float elapsed = 0f;
+        Color imgColor = image.color;
+        
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            t = t * t * (3f - 2f * t); // Smooth step
+            
+            imgColor.a = Mathf.Lerp(startAlpha, endAlpha, t);
+            image.color = imgColor;
+            
+            yield return null;
+        }
+        
+        imgColor.a = endAlpha;
+        image.color = imgColor;
     }
 }
