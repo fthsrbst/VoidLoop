@@ -155,9 +155,9 @@ MonoBehaviour:
   mainSpotlight: {fileID: 0}
   fillLight: {fileID: 0}
   bulbGlow: {fileID: 0}
-  baseIntensity: 7
+  baseIntensity: 19.7
   baseRange: 70
-  baseSpotAngle: 50
+  baseSpotAngle: 68.2
   baseInnerAngle: 25
   baseColor: {r: 1, g: 0.95, b: 0.85, a: 1}
   flashlightCookie: {fileID: 0}
