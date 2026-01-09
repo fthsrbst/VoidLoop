@@ -33,7 +33,7 @@ EditorBuildSettings:
     path: Assets/Scenes/AnomalyLight.unity
     guid: efabefb9959824ae79924555938381e6
   - enabled: 1
-    path: Assets/Scenes/AnomalyLittle.unity
+    path: Assets/Scenes/AnomalySpeaker.unity
     guid: f2c8b191c08664633b2b0d0624588b17
   - enabled: 1
     path: Assets/Scenes/AnomalyShelve.unity

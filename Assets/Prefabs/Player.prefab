@@ -132,10 +132,10 @@ MonoBehaviour:
   headbobFrequency: 1.5
   headbobAmplitude: 0.1
   footstepSounds:
-  - {fileID: 8300000, guid: 8b674eb30f5a64699acfb92a4e0ef611, type: 3}
-  jumpSound: {fileID: 0}
-  landSound: {fileID: 8300000, guid: ddf1c651349aa804bb2f8d5d664818f6, type: 3}
-  footstepInterval: 0.5
+  - {fileID: 8300000, guid: 8616f21d65d79194aa0892e83910f749, type: 3}
+  jumpSound: {fileID: 8300000, guid: ddf1c651349aa804bb2f8d5d664818f6, type: 3}
+  landSound: {fileID: 0}
+  footstepInterval: 0.4
   flashlight: {fileID: 0}
 --- !u!114 &6743044692638322912
 MonoBehaviour:
@@ -155,9 +155,9 @@ MonoBehaviour:
   mainSpotlight: {fileID: 0}
   fillLight: {fileID: 0}
   bulbGlow: {fileID: 0}
-  baseIntensity: 7
+  baseIntensity: 19.7
   baseRange: 70
-  baseSpotAngle: 50
+  baseSpotAngle: 68.2
   baseInnerAngle: 25
   baseColor: {r: 1, g: 0.95, b: 0.85, a: 1}
   flashlightCookie: {fileID: 0}
@@ -171,7 +171,7 @@ MonoBehaviour:
   swayAmount: 0.02
   swaySpeed: 1.5
   useBattery: 1
-  maxBattery: 20
+  maxBattery: 50
   batteryDrainRate: 1.5
   criticalBatteryThreshold: 0.2
   lowBatteryThreshold: 0.4

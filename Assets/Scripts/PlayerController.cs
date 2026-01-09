@@ -524,29 +524,46 @@ public class PlayerController : MonoBehaviour
         characterController.Move(finalMovement * Time.deltaTime);
     }
 
-    private void HandleFootsteps()
+private void HandleFootsteps()
+{
+    // Eksik referans kontrolü
+    if (footstepSounds == null || footstepSounds.Length == 0 || audioSource == null)
+        return;
+
+    // Hareket ve yer kontrolü
+    if (isGrounded && currentMoveVelocity.magnitude > 0.5f)
     {
-        if (footstepSounds == null || footstepSounds.Length == 0 || audioSource == null)
-            return;
+        // %80 SEVİYESİNE ÇIKAR (Orijinalden %20 kısıldı)
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.8f, Time.deltaTime * 5f);
 
-        if (isGrounded && currentMoveVelocity.magnitude > 0.5f)
-        {
-            footstepTimer += Time.deltaTime;
-            float interval = isSprinting ? footstepInterval * 0.6f : footstepInterval;
+        footstepTimer += Time.deltaTime;
 
-            if (footstepTimer >= interval)
-            {
-                footstepTimer = 0f;
-                AudioClip footstep = footstepSounds[Random.Range(0, footstepSounds.Length)];
-                audioSource.PlayOneShot(footstep, 0.5f);
-            }
-        }
-        else
+        // Koşma çarpanı (0.75f)
+        float interval = isSprinting ? footstepInterval * 0.75f : footstepInterval;
+
+        if (footstepTimer >= interval)
         {
             footstepTimer = 0f;
+            AudioClip footstep = footstepSounds[Random.Range(0, footstepSounds.Length)];
+            
+            // %80 ŞİDDETİNDE ÇAL
+            audioSource.PlayOneShot(footstep, 0.8f); 
         }
     }
-
+    else
+    {
+        footstepTimer = 0f;
+        // Sesi her karede yavaşça sıfıra çek (Fade-out)
+        if (audioSource.volume > 0)
+        {
+            audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0, Time.deltaTime * 4f);
+        }
+        else if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+    }
+}
     private void HandleLanding()
     {
         // Yere iniş kontrolü
