@@ -1,6 +1,7 @@
 # VoidLoop
 
 🏢 An endless escape game themed around office anomalies
+![WhatsApp Image 2026-01-25 at 22 03 14](https://github.com/user-attachments/assets/f969559d-a488-4b96-a0b9-a9160fb680aa)
 
 ## 📋 Table of Contents
 - [About the Project](#about-the-project)
